@@ -1,4 +1,7 @@
-package com.kongo.history.api.kongohistoryapi.resource;
+//package com.kunal52.springandfirebaseauth.controller;
+
+package com.kongo.history.api.kongohistoryapi.controller;
+
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

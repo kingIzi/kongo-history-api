@@ -1,42 +1,42 @@
 package com.kongo.history.api.kongohistoryapi.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kongo.history.api.kongohistoryapi.auth.model.SecurityProperties;
+import com.kongo.history.api.kongohistoryapi.auth.models.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Date;
 
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter{
-    @Autowired
-    private ObjectMapper objectMapper;
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private SecurityProperties securityProperties;
+    ObjectMapper objectMapper;
 
     @Autowired
-    public SecurityFilter securityFilter;
+    SecurityProperties restSecProps;
+
+    @Autowired
+    public SecurityFilter tokenAuthenticationFilter;
 
     @Bean
     public AuthenticationEntryPoint restAuthenticationEntryPoint() {
@@ -56,11 +56,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(this.securityProperties.getAllowedOrigins());
-        configuration.setAllowedMethods(this.securityProperties.getAllowedMethods());
-        configuration.setAllowedHeaders(this.securityProperties.getAllowedHeaders());
-        configuration.setAllowCredentials(this.securityProperties.isAllowCredentials());
-        configuration.setExposedHeaders(this.securityProperties.getExposedHeaders());
+        configuration.setAllowedOrigins(restSecProps.getAllowedOrigins());
+        configuration.setAllowedMethods(restSecProps.getAllowedMethods());
+        configuration.setAllowedHeaders(restSecProps.getAllowedHeaders());
+        configuration.setAllowCredentials(restSecProps.isAllowCredentials());
+        configuration.setExposedHeaders(restSecProps.getExposedHeaders());
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -71,9 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.cors().configurationSource(corsConfigurationSource()).and().csrf().disable().formLogin().disable()
                 .httpBasic().disable().exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint())
                 .and().authorizeRequests()
-                .antMatchers(this.securityProperties.getAllowedPublicApis().toArray(String[]::new)).permitAll()
+                .antMatchers(restSecProps.getAllowedPublicApis().toArray(String[]::new)).permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated().and()
-                .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 }

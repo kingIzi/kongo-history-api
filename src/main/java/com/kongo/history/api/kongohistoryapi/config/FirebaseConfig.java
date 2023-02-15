@@ -3,7 +3,7 @@ package com.kongo.history.api.kongohistoryapi.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.kongo.history.api.kongohistoryapi.auth.model.SecurityProperties;
+import  com.kongo.history.api.kongohistoryapi.auth.models.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +15,21 @@ import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
+
+    @Autowired
+    SecurityProperties secProps;
+
     @Primary
     @Bean
     public void firebaseInit() {
+        InputStream inputStream = null;
         try {
-            final var inputStream = new ClassPathResource("firebase_config.json").getInputStream();
+            inputStream = new ClassPathResource("firebase_config.json").getInputStream();
+        } catch (IOException e3) {
+            e3.printStackTrace();
+        }
+        try {
+
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(inputStream))
                     .build();
@@ -33,4 +43,5 @@ public class FirebaseConfig {
             e.printStackTrace();
         }
     }
+
 }

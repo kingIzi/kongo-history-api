@@ -1,20 +1,20 @@
 package com.kongo.history.api.kongohistoryapi.auth;
 
-import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
 
-import com.kongo.history.api.kongohistoryapi.auth.model.SecurityProperties;
-import com.kongo.history.api.kongohistoryapi.auth.model.Credentials;
-import com.kongo.history.api.kongohistoryapi.auth.model.User;
-import com.kongo.history.api.kongohistoryapi.util.CookieUtils;
+import com.kongo.history.api.kongohistoryapi.auth.models.Credentials;
+import com.kongo.history.api.kongohistoryapi.auth.models.SecurityProperties;
+import com.kongo.history.api.kongohistoryapi.auth.models.User;
+import com.kongo.history.api.kongohistoryapi.utils.CookieUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -26,30 +26,34 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class SecurityFilter extends OncePerRequestFilter {
+
     @Autowired
-    private SecurityService securityService;
+    SecurityService securityService;
+
     @Autowired
     SecurityProperties restSecProps;
+
     @Autowired
     CookieUtils cookieUtils;
+
     @Autowired
     SecurityProperties securityProps;
 
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        this.verifyToken(request);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        verifyToken(request);
         filterChain.doFilter(request, response);
     }
 
-    private void verifyToken(HttpServletRequest request){
+    private void verifyToken(HttpServletRequest request) {
         String session = null;
         FirebaseToken decodedToken = null;
         Credentials.CredentialType type = null;
-        boolean strictServerSessionEnabled = this.securityProps.getFirebaseProps().isEnableStrictServerSession();
-        Cookie sessionCookie = this.cookieUtils.getCookie("session");
-        String token = this.securityService.getBearerToken(request);
-        this.logger.info(token);
+        boolean strictServerSessionEnabled = securityProps.getFirebaseProps().isEnableStrictServerSession();
+        Cookie sessionCookie = cookieUtils.getCookie("session");
+        String token = securityService.getBearerToken(request);
+        logger.info(token);
         try {
             if (sessionCookie != null) {
                 session = sessionCookie.getValue();
@@ -62,26 +66,17 @@ public class SecurityFilter extends OncePerRequestFilter {
                     type = Credentials.CredentialType.ID_TOKEN;
                 }
             }
-            this.transformFirebaseTokenToDto(decodedToken,type,token,session,request);
-        }
-        catch (FirebaseAuthException e) {
+        } catch (FirebaseAuthException e) {
             e.printStackTrace();
             log.error("Firebase Exception:: ", e.getLocalizedMessage());
         }
-        catch (Exception e){
-            e.printStackTrace();
+        User user = firebaseTokenToUserDto(decodedToken);
+        if (user != null) {
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,
+                    new Credentials(type, decodedToken, token, session), null);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-    }
-
-    private void transformFirebaseTokenToDto(FirebaseToken decodedToken,Credentials.CredentialType type,String token,String session,HttpServletRequest request) throws Exception{
-        User user = this.firebaseTokenToUserDto(decodedToken);
-        if (user != null)
-            throw new Exception("Failed to transform FirebaseToken to User DTO");
-
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user,
-                new Credentials(type, decodedToken, token, session), null);
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     private User firebaseTokenToUserDto(FirebaseToken decodedToken) {
@@ -97,4 +92,5 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
         return user;
     }
+
 }

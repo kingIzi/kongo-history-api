@@ -1,6 +1,8 @@
-package com.kongo.history.api.kongohistoryapi.resource;
+//package com.kunal52.springandfirebaseauth.controller;
 
-import com.kongo.history.api.kongohistoryapi.auth.model.User;
+package com.kongo.history.api.kongohistoryapi.controller;
+
+import com.kongo.history.api.kongohistoryapi.auth.models.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,10 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("private")
-public class PrivateEndpoints {
+public class PrivateEndpoint {
 
     @GetMapping("user-details")
     public ResponseEntity<User> getUserInfo(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(user);
     }
+
 }
