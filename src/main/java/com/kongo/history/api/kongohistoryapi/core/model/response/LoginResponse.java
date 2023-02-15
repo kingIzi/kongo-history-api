@@ -5,8 +5,12 @@ import lombok.Data;
 @Data
 public class LoginResponse {
     private String email;
-    private Long expiresIn;
+    private String expiresIn;
     private String idToken;
     private String localId;
     private String refreshToken;
+    private String kind;
+    private boolean registered;
+
+    private String displayName;
 }
