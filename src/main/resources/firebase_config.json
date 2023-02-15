@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "kongo-history-database",
+  "private_key_id": "2dbbc41b66f236453b98ad86ce0b5776053e7d24",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCxN2wgcZMwgwhV\neFpTkDRiw+fAqbgW7/7MZ+5ywZs6/KOyCPuaDI3x4f87TDlhkduZBfz+roJRctJX\nDXMKueH4ui2k6lLlkE/uPjUvndkvHnuhyZBJH/qYCmZCJ+7tR6Bupl+GjYo7C1gz\nsBFqEmtca+ZC2oYPMQMS7BNn1o5lv6WAJrBd1d6gPHT9glc+pur8r4NrkF2jRbti\ne106/T6+ByZp+rSKIcICAllJranx8dzPZf8X+oDamXcrWRJBGe80RdstRXdY5raX\nSVzO2MZIu53oHmrGHrhxMIaeV/UAVFkwxlSLuYoSJ80C5L944bvcEH3CqfnGqkIN\nKvD5fO/xAgMBAAECggEAB7NUkblVr8E12r7qz+A/gn4oQx0s2GRP0lJ+0EI87Ex/\nkXQl+KzsexL6q/k1MhnsLKNPucJb+82NOcamFdR7bvsqEhUzinGho4TU+0902UEO\nFrrjN+Y5laM4C85f6bQX0s8MbhSW6ddlmwNe0ljgDOlMXWHQ+vaCf28+LaArWlzt\nmX8LpQyJePr1rF/8fxBWSdYbBI+pGBWBBZocf9GmjO4NCqcJsMjVpJMQHb4rNxUH\nRQmRNz6KivyrgPG09fIm9q6f1bhL2fgOcSN0E1CI6HgPdWXf16JaAipc60JeIJJ/\nLrcJxPd/UOJIsjDI7TvTNv1yuhZczjYCSPmCa2LWsQKBgQDykbd5QgdSFoGqtXMG\nLBeQZzJzVO7WaPkCXCZetbCYTbhPq7lObC6x/8Na+zhQ+pJRB8R2Bcvj9ecrgrPm\nf3sUAlixoyZgxpUylpZHJY/YAKErLELATVeJw7ZPObKdan60JoVCQb/Fn4cgG9Ir\nZeystRCMQxzph/O1eiYFmEJHKQKBgQC7B14OFdW9Gj4onoZlF5vuFkA9OTPGOPcF\nM6CcF2N+z10FvYG19c8Q3vdOmcPlw90ZM7j5tGAelmxbj12Zo89c7d4abbmieFjO\nIGWqUwrthGdQvA2JTLB4jDpFRWGjdmeoNlm/yXIt82qeV4LY7q8rh+/9Z/2ISzmp\nf+mUCIBjiQKBgQDjEIyTMb/wk6jlx9zYlkWoozGSzJqWksUl9GTmm2Wn7Hjv+2wH\ngTVk4mpYrHnXM/fraj35zQtDZVj0XfFRf1wTKu8jufme9cWMCXK7Puob5Nr5swD5\nSmz7RP1PxE7zFFFvCfAMScfekqrG38QpY8vdD9FhuyFBakY0Rxd4fULtoQKBgFZ+\n2MPA22GiUl7suZDlM0sP5VOrMcOZsrwoHT4zHuOVuRqfgu6JKONPiqZCPLP1Ojqe\njgyFm/JpdOF/UzVr6cm7hH1Kg5CdAc0KdJop36LrGfDfl48I9ZA6ofRJWxeC+ft0\nb1tgKbsQmR1zsWLsN/z02EuknT88MwWtz3OT3vSpAoGBAOFCYIqkZ0X7qEYA32f2\ntTj+GJY3YZR4WsdBesWzyfeFUq3CAqw8NmOPD6n/HjjRPC1jATuKtY9K1WH4oObP\nniamaUzo15pnxdo4saVKk674/8HYTUAgAX+AS25H93ixEqzUo+4ghNucpsygnkaU\nJa8/ZM3iCWcCqRMdIGhScbzl\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-p44ai@kongo-history-database.iam.gserviceaccount.com",
+  "client_id": "110697250984247539442",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-p44ai%40kongo-history-database.iam.gserviceaccount.com"
+}

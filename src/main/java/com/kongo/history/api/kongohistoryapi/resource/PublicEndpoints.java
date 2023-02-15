@@ -1,15 +1,16 @@
 package com.kongo.history.api.kongohistoryapi.resource;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/config")
-public class ConfigResource{
-    @GetMapping("/login")
-    public String hello(){
-        return "Hello world";
+@RequestMapping("public")
+public class PublicEndpoints {
+
+    @GetMapping("test")
+    ResponseEntity<String> getPublic() {
+        return ResponseEntity.ok("OK");
     }
 }
-
