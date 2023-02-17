@@ -2,6 +2,7 @@ package com.kongo.history.api.kongohistoryapi.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseOptions;
 import  com.kongo.history.api.kongohistoryapi.auth.models.SecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class FirebaseConfig {
 
     @Autowired
     SecurityProperties secProps;
+
+    private InputStream inputStream;
 
     public static final String FIREBASE_PATH = "firebase_config.json";
 
@@ -56,12 +59,15 @@ public class FirebaseConfig {
 
     @Bean
     public Firestore getFireStore(@Value(FirebaseConfig.FIREBASE_PATH) String credentialPath) throws IOException {
-		var serviceAccount = new FileInputStream(credentialPath);
-		var credentials = GoogleCredentials.fromStream(serviceAccount);
-
-		var options = FirestoreOptions.newBuilder()
-						.setCredentials(credentials).build();
-
-		return options.getService();
-	}
+	    try{
+            final var serviceAccount = new ClassPathResource(FirebaseConfig.FIREBASE_PATH).getInputStream();
+            final var credentials = GoogleCredentials.fromStream(serviceAccount);
+            final var options = FirestoreOptions.newBuilder().setCredentials(credentials).build();
+            return options.getService();
+        }
+        catch (IOException io){
+            io.printStackTrace();
+            return null;
+        }
+    }
 }
