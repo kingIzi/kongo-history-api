@@ -1,5 +1,3 @@
-//package com.kunal52.springandfirebaseauth.controller;
-
 package com.kongo.history.api.kongohistoryapi.controller;
 
 
@@ -9,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("public")
-public class PublicEndpoints {
+@RequestMapping("comic")
+public class ComicEndpoints {
 
     @GetMapping("test")
     ResponseEntity<String> getPublic() {
