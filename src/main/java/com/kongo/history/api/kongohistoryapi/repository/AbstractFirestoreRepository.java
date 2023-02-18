@@ -9,6 +9,9 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -16,6 +19,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.annotations.Nullable;
 import com.kongo.history.api.kongohistoryapi.utils.DocumentId;
 
@@ -41,19 +45,16 @@ public class AbstractFirestoreRepository<T> {
         return (Class<T>)type.getActualTypeArguments()[0];
     }
 
-    public boolean save(T model){
-        String documentId = getDocumentId(model);
-        ApiFuture<WriteResult> resultApiFuture = collectionReference.document(documentId).set(model);
-
+    public String save(T model){
+        final var documentId = getDocumentId(model);
         try {
+            final var resultApiFuture = collectionReference.document(documentId).set(model);
             log.info("{}-{} saved at{}", collectionName, documentId, resultApiFuture.get().getUpdateTime());
-            return true;
+            return documentId;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error saving {}={} {}", collectionName, documentId, e.getMessage());
         }
-
-        return false;
-
+        return "";
     }
 
     public void delete(T model){

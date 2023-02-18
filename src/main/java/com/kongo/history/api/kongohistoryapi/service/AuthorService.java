@@ -1,0 +1,80 @@
+package com.kongo.history.api.kongohistoryapi.service;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.firebase.cloud.FirestoreClient;
+import com.kongo.history.api.kongohistoryapi.model.entity.Author;
+import com.kongo.history.api.kongohistoryapi.model.entity.Comic;
+import com.kongo.history.api.kongohistoryapi.model.form.AuthorForm;
+import com.kongo.history.api.kongohistoryapi.repository.AbstractFirestoreRepository;
+import com.kongo.history.api.kongohistoryapi.repository.AuthorRepository;
+import com.kongo.history.api.kongohistoryapi.repository.ComicsRepository;
+import com.kongo.history.api.kongohistoryapi.utils.AppConst;
+import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
+import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
+import com.kongo.history.api.kongohistoryapi.utils.UtilityFormatter;
+import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
+
+import java.time.LocalDate;
+
+
+@Service
+public class AuthorService {
+    @Autowired
+    private AuthorRepository authorRepository;
+
+    private Author makeAuthor(final AuthorForm authorForm) throws ValueDataException{
+        final var localDate = LocalDate.parse(authorForm.getDateOfBirth());
+        if (localDate == null)
+            throw new ValueDataException("Could not parse Date String. Please Ensure format is yyyy-MM-dd",AppConst._KEY_CODE_PARAMS_ERROR);
+
+        final var dateOfBirth = AppUtilities.convertStringFormatToDate(authorForm.getDateOfBirth());
+        final var author = new Author(authorForm.getFirstName(),authorForm.getLastName(),dateOfBirth,authorForm.getAddress(),authorForm.getPhoneNumber());
+        return author;
+    }
+
+    public HttpDataResponse<Author> create(final AuthorForm authorForm){
+        final var httpDataResponse = new HttpDataResponse<Author>();
+        try{            
+            final var saved = this.authorRepository.save(this.makeAuthor(authorForm));
+            if (!saved.isEmpty())
+                httpDataResponse.setResponse(this.authorRepository.updateInsertedAuthorId(saved));
+            else
+                throw new ValueDataException(ValueDataException.itemNotCreatedMsg("Author"),AppConst._KEY_CODE_PARAMS_ERROR);
+        }
+        catch(ValueDataException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return httpDataResponse;
+    }
+
+    public HttpDataResponse<Author> findAuthor(final String documentId){
+        final var httpDataResponse = new HttpDataResponse<Author>();
+        try{
+            final var author = this.authorRepository.get(documentId);
+            if (author.isPresent())
+                httpDataResponse.setResponse(author.get());
+            else
+                throw new ValueDataException(ValueDataException.itemNotFoundErrorMsg("Author", documentId),AppConst._KEY_CODE_PARAMS_ERROR);
+        }
+        catch(ValueDataException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+    
+}

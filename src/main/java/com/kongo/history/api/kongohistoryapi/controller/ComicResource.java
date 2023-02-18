@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("private")
-public class PrivateEndpoint {
+@RequestMapping("comic")
+public class ComicResource {
 
-    @GetMapping("user-details")
+    @GetMapping("create")
     public ResponseEntity<User> getUserInfo(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(user);
     }

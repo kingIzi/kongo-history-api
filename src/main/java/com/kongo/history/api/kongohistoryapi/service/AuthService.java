@@ -32,6 +32,7 @@ public class AuthService {
             final var request = new HttpEntity<>(loginForm,headers);
             final var response = this.restTemplate.postForEntity(AuthService.SIGN_IN_WITH_EMAIL_PASSWORD,request,LoginResponse.class);
             httpDataResponse.setResponse(response.getBody());
+            System.out.println(httpDataResponse.getResponse().getEmail());
         }
         catch (Exception e){
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.kongo.history.api.kongohistoryapi.config;
 
+import com.google.cloud.storage.Storage;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
+import com.google.cloud.storage.StorageOptions;
 
 
 @Configuration
@@ -58,7 +60,7 @@ public class FirebaseConfig {
     }
 
     @Bean
-    public Firestore getFireStore(@Value(FirebaseConfig.FIREBASE_PATH) String credentialPath) throws IOException {
+    public Firestore getFireStore(@Value(FirebaseConfig.FIREBASE_PATH) String credentialPath) {
 	    try{
             final var serviceAccount = new ClassPathResource(FirebaseConfig.FIREBASE_PATH).getInputStream();
             final var credentials = GoogleCredentials.fromStream(serviceAccount);
@@ -66,6 +68,19 @@ public class FirebaseConfig {
             return options.getService();
         }
         catch (IOException io){
+            io.printStackTrace();
+            return null;
+        }
+    }
+
+    @Bean 
+    public Storage getStorage(@Value(FirebaseConfig.FIREBASE_PATH) String credentialPath) {
+        try{
+            final var serviceAccount = new ClassPathResource(FirebaseConfig.FIREBASE_PATH).getInputStream();
+            final var credentials = GoogleCredentials.fromStream(serviceAccount);
+            return StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        }
+        catch(IOException io){
             io.printStackTrace();
             return null;
         }
