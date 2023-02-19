@@ -3,8 +3,11 @@ package com.kongo.history.api.kongohistoryapi.controller;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
@@ -23,14 +26,13 @@ public class AuthorResource implements AuthorInterface{
     private AuthorService authorService;
 
     @Override
-    @PostMapping("create")
-    public HttpDataResponse<Author> createAuthor(@Valid AuthorForm authorForm) {
-        // TODO Auto-generated method stub
+    @PostMapping("createOne")
+    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AuthorForm authorForm) {
         return this.authorService.create(authorForm);
     }
 
     @Override
-    public HttpDataResponse<Author> updateAuthor(Long authorId, AuthorForm authorForm) {
+    public HttpDataResponse<Author> updateAuthor(String authorId, AuthorForm authorForm) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -42,7 +44,7 @@ public class AuthorResource implements AuthorInterface{
     }
 
     @Override
-    public HttpDataResponse<Author> removeAuthor(Long authorId) {
+    public HttpDataResponse<Author> removeAuthor(String authorId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -54,7 +56,7 @@ public class AuthorResource implements AuthorInterface{
     }
 
     @Override
-    public HttpDataResponse<Author> activate(Long authorId) {
+    public HttpDataResponse<Author> activate(String authorId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -66,7 +68,7 @@ public class AuthorResource implements AuthorInterface{
     }
 
     @Override
-    public HttpDataResponse<Author> deactivate(Long authorId) {
+    public HttpDataResponse<Author> deactivate(String authorId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -77,10 +79,10 @@ public class AuthorResource implements AuthorInterface{
         return null;
     }
 
+    @GetMapping("findOne")
     @Override
-    public HttpDataResponse<Author> findAuthor(Long authorId) {
-        // TODO Auto-generated method stub
-        return null;
+    public HttpDataResponse<Author> findAuthor(@RequestParam(required = true) String authorId) {
+        return this.authorService.findAuthor(authorId);
     }
 
     @Override
@@ -100,12 +102,5 @@ public class AuthorResource implements AuthorInterface{
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public HttpDataResponse<Author> findAuthor(String documentId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
     
 }

@@ -42,8 +42,8 @@ public class AuthorService {
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{            
             final var saved = this.authorRepository.save(this.makeAuthor(authorForm));
-            if (!saved.isEmpty())
-                httpDataResponse.setResponse(this.authorRepository.updateInsertedAuthorId(saved));
+            if (saved != null)
+                httpDataResponse.setResponse(saved);    
             else
                 throw new ValueDataException(ValueDataException.itemNotCreatedMsg("Author"),AppConst._KEY_CODE_PARAMS_ERROR);
         }

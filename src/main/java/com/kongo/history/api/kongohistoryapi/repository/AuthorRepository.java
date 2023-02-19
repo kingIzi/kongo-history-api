@@ -18,11 +18,4 @@ public class AuthorRepository extends AbstractFirestoreRepository<Author> {
         super(firestore, AuthorRepository.NAME);
     }
     
-    public Author updateInsertedAuthorId(final String documentId) throws ValueDataException{
-        final var author = this.get(documentId);
-        if (!author.isPresent())
-            throw new ValueDataException(ValueDataException.itemNotFoundErrorMsg("Author", documentId));
-        author.get().setId(documentId);
-        return this.save(author.get()).isEmpty() ? null : author.get();
-    }
 }

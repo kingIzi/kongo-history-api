@@ -9,7 +9,7 @@ import lombok.Data;
 
 
 @Data
-public class Author {
+public class Author extends BaseEntity {
     @DocumentId
     private String id;
     private String firstName;
@@ -27,4 +27,14 @@ public class Author {
     }
 
     public Author(){}
+
+    @Override
+    public void setId(final String id){
+        this.id = id;
+    }
+
+    @Override
+    public final String getId(){
+        return this.id;
+    }
 }

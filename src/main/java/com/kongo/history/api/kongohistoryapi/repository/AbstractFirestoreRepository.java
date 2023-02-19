@@ -21,11 +21,16 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.annotations.Nullable;
+import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
+//import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
 import com.kongo.history.api.kongohistoryapi.utils.DocumentId;
 
 import lombok.extern.slf4j.Slf4j;
 
 import com.google.cloud.firestore.WriteResult;
+
+import com.google.common.reflect.TypeToken;
+import java.lang.reflect.Type;
 
 
 @Slf4j
@@ -34,6 +39,16 @@ public class AbstractFirestoreRepository<T> {
     private final String collectionName;
     private final Class<T> parameterizedType;
 
+    private abstract class GenericClass<K> {
+        private final TypeToken<K> typeToken = new TypeToken<K>(this.getClass()) { };
+        private final Type type = typeToken.getType(); // or getRawType() to return Class<? super T>
+      
+        public Type getType() {
+          return type;
+        }
+      
+      }
+
     protected AbstractFirestoreRepository(Firestore firestore, String collection) {
         this.collectionReference = firestore.collection(collection);
         this.collectionName = collection;
@@ -41,32 +56,40 @@ public class AbstractFirestoreRepository<T> {
     }
 
     private Class<T> getParameterizedType(){
-        ParameterizedType type = (ParameterizedType) this.getClass().getGenericSuperclass();
+        final var type = (ParameterizedType) this.getClass().getGenericSuperclass();
         return (Class<T>)type.getActualTypeArguments()[0];
     }
 
-    public String save(T model){
-        final var documentId = getDocumentId(model);
+    public final T save(T model){
+        final var documentId = this.getDocumentId(model);
         try {
+            if (documentId.isEmpty())
+                throw new Exception("SOMETHING WENT WRONG PLEASE CONTACT SUPPORT!");
+            
+            ((BaseEntity) model).setId(documentId);
             final var resultApiFuture = collectionReference.document(documentId).set(model);
             log.info("{}-{} saved at{}", collectionName, documentId, resultApiFuture.get().getUpdateTime());
-            return documentId;
+            return model;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error saving {}={} {}", collectionName, documentId, e.getMessage());
         }
-        return "";
+        catch(Exception e){
+            e.printStackTrace();
+            log.error("Error handling {}",e.getMessage());
+        }
+        return null;
     }
 
     public void delete(T model){
-        String documentId = this.getDocumentId(model);
+        final var documentId = this.getDocumentId(model);
         final var resultApiFuture = collectionReference.document(documentId).delete();
     }
 
     public List<T> retrieveAll(){
-        ApiFuture<QuerySnapshot> querySnapshotApiFuture = collectionReference.get();
+        final var querySnapshotApiFuture = collectionReference.get();
 
         try {
-            List<QueryDocumentSnapshot> queryDocumentSnapshots = querySnapshotApiFuture.get().getDocuments();
+            final var queryDocumentSnapshots = querySnapshotApiFuture.get().getDocuments();
 
             return queryDocumentSnapshots.stream()
                     .map(queryDocumentSnapshot -> queryDocumentSnapshot.toObject(parameterizedType))
@@ -80,11 +103,11 @@ public class AbstractFirestoreRepository<T> {
     }
 
     public Optional<T> get(String documentId){
-        DocumentReference documentReference = collectionReference.document(documentId);
-        ApiFuture<DocumentSnapshot> documentSnapshotApiFuture = documentReference.get();
+        final var documentReference = collectionReference.document(documentId);
+        final var documentSnapshotApiFuture = documentReference.get();
 
         try {
-            DocumentSnapshot documentSnapshot = documentSnapshotApiFuture.get();
+            final var documentSnapshot = documentSnapshotApiFuture.get();
 
             if(documentSnapshot.exists()){
                 return Optional.ofNullable(documentSnapshot.toObject(parameterizedType));
@@ -102,7 +125,7 @@ public class AbstractFirestoreRepository<T> {
         Object key;
         Class clzz = t.getClass();
         do{
-            key = getKeyFromFields(clzz, t);
+            key = this.getKeyFromFields(clzz, t);
             clzz = clzz.getSuperclass();
         } while(key == null && clzz != null);
 
@@ -135,5 +158,12 @@ public class AbstractFirestoreRepository<T> {
     protected CollectionReference getCollectionReference(){
         return this.collectionReference;
     }
-    protected Class<T> getType(){ return this.parameterizedType; }
+    
+    protected Class<T> getType(){ 
+        return this.parameterizedType; 
+    }
 }
+
+
+
+
