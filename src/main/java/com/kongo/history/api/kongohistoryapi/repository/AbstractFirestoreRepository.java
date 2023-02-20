@@ -39,23 +39,13 @@ public class AbstractFirestoreRepository<T> {
     private final String collectionName;
     private final Class<T> parameterizedType;
 
-    private abstract class GenericClass<K> {
-        private final TypeToken<K> typeToken = new TypeToken<K>(this.getClass()) { };
-        private final Type type = typeToken.getType(); // or getRawType() to return Class<? super T>
-      
-        public Type getType() {
-          return type;
-        }
-      
-      }
-
     protected AbstractFirestoreRepository(Firestore firestore, String collection) {
         this.collectionReference = firestore.collection(collection);
         this.collectionName = collection;
         this.parameterizedType = this.getParameterizedType();
     }
 
-    private Class<T> getParameterizedType(){
+    protected Class<T> getParameterizedType(){
         final var type = (ParameterizedType) this.getClass().getGenericSuperclass();
         return (Class<T>)type.getActualTypeArguments()[0];
     }
@@ -162,6 +152,12 @@ public class AbstractFirestoreRepository<T> {
     protected Class<T> getType(){ 
         return this.parameterizedType; 
     }
+
+    public List<T> makeListFromQuerySnapshots(final QuerySnapshot querySnapshot){
+        final var documents = querySnapshot.getDocuments();
+        return documents.stream().map(e -> e.toObject(this.parameterizedType)).collect(Collectors.toList());
+    }
+
 }
 
 

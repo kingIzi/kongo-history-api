@@ -1,6 +1,8 @@
 package com.kongo.history.api.kongohistoryapi.controller;
 
 import javax.validation.Valid;
+import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.model.form.AuthorForm;
+import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
 import com.kongo.history.api.kongohistoryapi.service.AuthorService;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 
@@ -19,14 +22,14 @@ import com.kongo.history.api.kongohistoryapi.interfaceResource.AuthorInterface;
 
 
 @RestController
-@RequestMapping("author")
+@RequestMapping("/author")
 public class AuthorResource implements AuthorInterface{
 
     @Autowired
     private AuthorService authorService;
 
     @Override
-    @PostMapping("createOne")
+    @PostMapping("/createOne")
     public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AuthorForm authorForm) {
         return this.authorService.create(authorForm);
     }
@@ -79,28 +82,22 @@ public class AuthorResource implements AuthorInterface{
         return null;
     }
 
-    @GetMapping("findOne")
+    @GetMapping("/findOne")
     @Override
     public HttpDataResponse<Author> findAuthor(@RequestParam(required = true) String authorId) {
         return this.authorService.findAuthor(authorId);
     }
 
+    @PostMapping("/list")
     @Override
-    public HttpDataResponse<Author> findAuthor(AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
+    public HttpDataResponse<List<Author>> getAuthorList(@RequestParam(required = false) int limit,@RequestBody final FindAuthorForm authorForm) {
+        return this.authorService.findAuthor(limit,authorForm);
     }
 
     @Override
-    public HttpDataResponse<?> getAuthorList() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<?> getAuthorList(Long limit) {
-        // TODO Auto-generated method stub
-        return null;
+    @GetMapping("/list")
+    public HttpDataResponse<?> getAuthorList(@RequestParam(required = true) int limit) {
+        return this.authorService.findAuthor(limit);
     }
     
 }
