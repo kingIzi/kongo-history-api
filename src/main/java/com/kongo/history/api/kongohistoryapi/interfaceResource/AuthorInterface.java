@@ -2,39 +2,21 @@ package com.kongo.history.api.kongohistoryapi.interfaceResource;
 
 import javax.validation.Valid;
 
-import org.springframework.web.bind.annotation.PostMapping;
+import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
-import com.kongo.history.api.kongohistoryapi.model.form.AuthorForm;
+import com.kongo.history.api.kongohistoryapi.model.form.AddAuthorForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
 
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-
-
 public interface AuthorInterface {
-
-    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AuthorForm authorForm);
-    
-    public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId,@RequestBody AuthorForm authorForm);
-    public HttpDataResponse<Author> updateAuthor(@RequestBody AuthorForm authorForm);
-    
+    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AddAuthorForm addAuthorForm);
+    public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId,@RequestBody UpdateAuthorForm updateAuthorForm);
     public HttpDataResponse<Author> removeAuthor(@RequestParam(required = true) String authorId);
-    public HttpDataResponse<Author> removeAuthor(@RequestBody AuthorForm authorForm);
-
-    public HttpDataResponse<Author> activate(@RequestParam(required = true) String authorId);
-    public HttpDataResponse<Author> activate(@RequestBody AuthorForm authorForm);
-
-    public HttpDataResponse<Author> deactivate(@RequestParam(required = true) String authorId);
-    public HttpDataResponse<Author> deactivate(@RequestBody AuthorForm authorForm);
-
     public HttpDataResponse<Author> findAuthor(@RequestParam(required = true) String authorId);
-
-    public HttpDataResponse<?> getAuthorList(@RequestParam(required = true) int limit,@RequestBody final FindAuthorForm authorForm);
-    public HttpDataResponse<?> getAuthorList(@RequestParam(required = true) int limit);
+    public HttpDataResponse<?> getAuthorList(@RequestParam(required = false) Integer limit, @RequestBody final FindAuthorForm authorForm);
+    public HttpDataResponse<?> getAuthorList(@RequestParam(required = false) Integer limit);
 }

@@ -1,14 +1,12 @@
 package com.kongo.history.api.kongohistoryapi.repository;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import com.kongo.history.api.kongohistoryapi.utils.AppConst;
+import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -30,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import com.google.cloud.firestore.WriteResult;
 
 import com.google.common.reflect.TypeToken;
+
+import javax.validation.ValidationException;
 import java.lang.reflect.Type;
 
 
@@ -70,13 +70,36 @@ public class AbstractFirestoreRepository<T> {
         return null;
     }
 
+    public final void save(final String documentId,final Map<String,Object> model){
+        try {
+            if (documentId.isEmpty())
+                throw new Exception("SOMETHING WENT WRONG. DOCUMENT_ID WAS NULL FOR UPDATE");
+
+            final var resultApiFuture = collectionReference.document(documentId).update(model);
+            log.info("{}-{} saved at{}", collectionName, documentId, resultApiFuture.get().getUpdateTime());
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error saving {}={} {}", collectionName, documentId, e.getMessage());
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            log.error("Error handling {}",e.getMessage());
+        }
+    }
+
     public void delete(T model){
         final var documentId = this.getDocumentId(model);
-        final var resultApiFuture = collectionReference.document(documentId).delete();
+        final var resultApiFuture = this.collectionReference.document(documentId).delete();
+    }
+
+    public void delete(final String documentId) throws Exception{
+        if (documentId.isEmpty())
+            throw new Exception("DOCUMENT_ID CANNOT BE EMPTY FOR DELETE!");
+
+        final var resultApiFuture = this.collectionReference.document(documentId).delete();
     }
 
     public List<T> retrieveAll(){
-        final var querySnapshotApiFuture = collectionReference.get();
+        final var querySnapshotApiFuture = this.collectionReference.get();
 
         try {
             final var queryDocumentSnapshots = querySnapshotApiFuture.get().getDocuments();

@@ -4,16 +4,12 @@ import javax.validation.Valid;
 import java.util.List;
 
 
+import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
-import com.kongo.history.api.kongohistoryapi.model.form.AuthorForm;
+import com.kongo.history.api.kongohistoryapi.model.form.AddAuthorForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
 import com.kongo.history.api.kongohistoryapi.service.AuthorService;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
@@ -30,56 +26,20 @@ public class AuthorResource implements AuthorInterface{
 
     @Override
     @PostMapping("/createOne")
-    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AuthorForm authorForm) {
-        return this.authorService.create(authorForm);
+    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AddAuthorForm addAuthorForm) {
+        return this.authorService.create(addAuthorForm);
     }
 
     @Override
-    public HttpDataResponse<Author> updateAuthor(String authorId, AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
+    @PostMapping("/updateOne")
+    public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId, @RequestBody UpdateAuthorForm updateAuthorForm) {
+        return this.authorService.updateAuthor(authorId,updateAuthorForm);
     }
 
     @Override
-    public HttpDataResponse<Author> updateAuthor(AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
+    @DeleteMapping("/deleteOne")
     public HttpDataResponse<Author> removeAuthor(String authorId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<Author> removeAuthor(AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<Author> activate(String authorId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<Author> activate(AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<Author> deactivate(String authorId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public HttpDataResponse<Author> deactivate(AuthorForm authorForm) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.authorService.removeAuthor(authorId);
     }
 
     @GetMapping("/findOne")
@@ -90,14 +50,16 @@ public class AuthorResource implements AuthorInterface{
 
     @PostMapping("/list")
     @Override
-    public HttpDataResponse<List<Author>> getAuthorList(@RequestParam(required = false) int limit,@RequestBody final FindAuthorForm authorForm) {
-        return this.authorService.findAuthor(limit,authorForm);
+    public HttpDataResponse<List<Author>> getAuthorList(@RequestParam(required = false) Integer limit,@RequestBody final FindAuthorForm authorForm) {
+        if (limit == null) { limit = 10; }
+        return this.authorService.getAuthorList(limit,authorForm);
     }
 
     @Override
     @GetMapping("/list")
-    public HttpDataResponse<?> getAuthorList(@RequestParam(required = true) int limit) {
-        return this.authorService.findAuthor(limit);
+    public HttpDataResponse<?> getAuthorList(@RequestParam(required = false) Integer limit) {
+        if (limit == null) { limit = 10; }
+        return this.authorService.getAuthorList(limit);
     }
     
 }

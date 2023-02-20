@@ -1,15 +1,15 @@
 package com.kongo.history.api.kongohistoryapi.validator;
 
-import com.kongo.history.api.kongohistoryapi.model.form.AuthorForm;
+import com.kongo.history.api.kongohistoryapi.model.form.AddAuthorForm;
 
 public class AddAuthorFormValidator extends Validator {
 
 
-    public AddAuthorFormValidator(final AuthorForm authorForm){
-        super(authorForm);
+    public AddAuthorFormValidator(final AddAuthorForm addAuthorForm){
+        super(addAuthorForm);
     }
 
-    public void validateForm(final AuthorForm authorForm){
+    public void validateForm(final AddAuthorForm addAuthorForm){
         
     }
 

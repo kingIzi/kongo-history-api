@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class AuthorForm {
+public class AddAuthorForm {
     @NotBlank
     private String firstName;
     @NotBlank
