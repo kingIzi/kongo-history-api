@@ -4,6 +4,11 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Optional;
 
 
@@ -12,6 +17,10 @@ import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
 import org.springframework.stereotype.Repository;
 
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.utils.AppConst;
@@ -23,9 +32,14 @@ import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
 public class AuthorRepository extends AbstractFirestoreRepository<Author> {
 
     private static final String NAME = "author";
+    
 
-    protected AuthorRepository(Firestore firestore) {
-        super(firestore, AuthorRepository.NAME);
+    // protected AuthorRepository(Firestore firestore) {
+    //     super(firestore, AuthorRepository.NAME);
+    // }
+
+    protected AuthorRepository(Firestore firestore, Storage storage){
+        super(firestore,AuthorRepository.NAME,storage);
     }
 
     private class KeyValue <V>{
@@ -105,6 +119,5 @@ public class AuthorRepository extends AbstractFirestoreRepository<Author> {
         final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot)); 
     }
-
 
 }

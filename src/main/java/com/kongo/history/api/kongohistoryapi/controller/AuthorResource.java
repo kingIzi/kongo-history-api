@@ -5,15 +5,20 @@ import java.util.List;
 
 
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
+import com.kongo.history.api.kongohistoryapi.utils.UtilityFormatter;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.model.form.AddAuthorForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
 import com.kongo.history.api.kongohistoryapi.service.AuthorService;
+import com.kongo.history.api.kongohistoryapi.utils.AppConst;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
-
+import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
 import com.kongo.history.api.kongohistoryapi.interfaceResource.AuthorInterface;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,12 +30,36 @@ public class AuthorResource implements AuthorInterface{
     @Autowired
     private AuthorService authorService;
 
+    //@Override
+            //@PostMapping("/createOne", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    // @PostMapping(path = "/createOne", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    // public HttpDataResponse<Author> createAuthor(@RequestParam(value = "file" , required = true) MultipartFile multipartFile, @Valid @RequestBody AddAuthorForm addAuthorForm) {
+    //     System.out.println(multipartFile.getOriginalFilename());
+    //     return new HttpDataResponse<>();
+    //     //return this.authorService.create(multipartFile,addAuthorForm);
+    // }
+
+    // @Override
+    // @PostMapping(path = "/createOne", consumes = {"image/png"})
+    // public HttpDataResponse<Author> createAuthor(@RequestPart AddAuthorForm addAuthorForm,@RequestPart MultipartFile photo) {
+    //     System.out.println(addAuthorForm.getPhoto().getOriginalFilename());
+    //     return null;
+    // }
+
     @Override
-    @PostMapping("/createOne")
-    public HttpDataResponse<Author> createAuthor(@RequestPart(value = "file" , required = true) MultipartFile multipartFile, @Valid @RequestBody AddAuthorForm addAuthorForm) {
-        System.out.println(multipartFile.getOriginalFilename());
-        return new HttpDataResponse<>();
-        //return this.authorService.create(multipartFile,addAuthorForm);
+    @PostMapping(path = "/create",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public HttpDataResponse<Author> createAuthor(@RequestParam("photo") MultipartFile photo,@ModelAttribute @Valid AddAuthorForm addAuthorForm){
+        final var httpDataResponse = new HttpDataResponse<Author>();
+        try{
+            if (photo.isEmpty())
+                throw new ValueDataException("Failed to parse form data. Photo param missing.", AppConst._KEY_CODE_PARAMS_ERROR);
+            return this.authorService.create(photo,addAuthorForm);
+        }
+        catch(ValueDataException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,e);
+        }
+        return httpDataResponse;
     }
 
     @Override

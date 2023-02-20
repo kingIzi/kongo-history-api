@@ -21,7 +21,12 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 @Service
@@ -37,43 +42,45 @@ public class AuthorService {
         final var dateOfBirth = AppUtilities.convertStringFormatToDate(addAuthorForm.getDateOfBirth());
         return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim());
     }
+ 
 
-    public HttpDataResponse<Author> create(final MultipartFile multipartFile,final AddAuthorForm addAuthorForm){
+    public HttpDataResponse<Author> create(final MultipartFile photo,final AddAuthorForm addAuthorForm){
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{
-
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-        return httpDataResponse;
-    }
-
-    /*public HttpDataResponse<Author> create(final MultipartFile multipartFile,final AddAuthorForm addAuthorForm){
-        final var httpDataResponse = new HttpDataResponse<Author>();
-        try{            
-            final var saved = this.authorRepository.save(this.makeAuthor(addAuthorForm));
-            if (saved != null)
-                httpDataResponse.setResponse(saved);    
-            else
-                throw new ValueDataException(ValueDataException.itemNotCreatedMsg("Author"),AppConst._KEY_CODE_PARAMS_ERROR);
+            final var photoUrl = this.authorRepository.uploadFile(photo);
+            if (photoUrl != null && !photoUrl.isEmpty()){
+                addAuthorForm.setPhotoUrl(photoUrl);
+                final var saved = this.authorRepository.save(this.makeAuthor(addAuthorForm));
+                saved.ifPresentOrElse(httpDataResponse::setResponse, saved::orElseThrow);
+            }
+            else{
+                throw new ValueDataException("Failed to upload photo url. Please contact support",AppConst._KEY_CODE_INTERNAL_ERROR);
+            }
         }
         catch(ValueDataException e){
             e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,e);
+        }
+        catch(NoSuchElementException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         catch(Exception e){
             e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         return httpDataResponse;
-    }*/
+    }
 
     public HttpDataResponse<Author> findAuthor(final String documentId){
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{
             final var author = this.authorRepository.get(documentId);
             author.ifPresentOrElse(httpDataResponse::setResponse,author::orElseThrow);
-            //author.ifPresent(httpDataResponse::setResponse);
+        }
+        catch(NoSuchElementException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -87,7 +94,10 @@ public class AuthorService {
         try{
             final var data = this.authorRepository.searchByCriteria(limit);
             data.ifPresentOrElse(httpDataResponse::setResponse,data::orElseThrow);
-            //data.ifPresent(httpDataResponse::setResponse);
+        }
+        catch(NoSuchElementException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         catch(ValueDataException e){
             e.printStackTrace();
@@ -105,7 +115,10 @@ public class AuthorService {
         try{
             final var data = this.authorRepository.searchByCriteria(limit,findAuthorForm);
             data.ifPresentOrElse(httpDataResponse::setResponse,data::orElseThrow);
-            //data.ifPresent(httpDataResponse::setResponse);
+        }
+        catch(NoSuchElementException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         catch(ValueDataException e){
             e.printStackTrace();
