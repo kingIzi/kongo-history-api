@@ -15,6 +15,7 @@ import com.kongo.history.api.kongohistoryapi.service.AuthorService;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 
 import com.kongo.history.api.kongohistoryapi.interfaceResource.AuthorInterface;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -26,8 +27,10 @@ public class AuthorResource implements AuthorInterface{
 
     @Override
     @PostMapping("/createOne")
-    public HttpDataResponse<Author> createAuthor(@Valid @RequestBody AddAuthorForm addAuthorForm) {
-        return this.authorService.create(addAuthorForm);
+    public HttpDataResponse<Author> createAuthor(@RequestPart(value = "file" , required = true) MultipartFile multipartFile, @Valid @RequestBody AddAuthorForm addAuthorForm) {
+        System.out.println(multipartFile.getOriginalFilename());
+        return new HttpDataResponse<>();
+        //return this.authorService.create(multipartFile,addAuthorForm);
     }
 
     @Override

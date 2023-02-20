@@ -14,6 +14,7 @@ import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 import com.kongo.history.api.kongohistoryapi.utils.UtilityFormatter;
 import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -37,7 +38,18 @@ public class AuthorService {
         return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim());
     }
 
-    public HttpDataResponse<Author> create(final AddAuthorForm addAuthorForm){
+    public HttpDataResponse<Author> create(final MultipartFile multipartFile,final AddAuthorForm addAuthorForm){
+        final var httpDataResponse = new HttpDataResponse<Author>();
+        try{
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return httpDataResponse;
+    }
+
+    /*public HttpDataResponse<Author> create(final MultipartFile multipartFile,final AddAuthorForm addAuthorForm){
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{            
             final var saved = this.authorRepository.save(this.makeAuthor(addAuthorForm));
@@ -54,7 +66,7 @@ public class AuthorService {
             e.printStackTrace();
         }
         return httpDataResponse;
-    }
+    }*/
 
     public HttpDataResponse<Author> findAuthor(final String documentId){
         final var httpDataResponse = new HttpDataResponse<Author>();
