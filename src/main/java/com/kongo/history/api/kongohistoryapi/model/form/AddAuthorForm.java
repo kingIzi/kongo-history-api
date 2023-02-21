@@ -21,4 +21,5 @@ public class AddAuthorForm implements Serializable {
     @NotBlank
     private String phoneNumber;
     private String photoUrl;
+    private String photoFileName;
 }

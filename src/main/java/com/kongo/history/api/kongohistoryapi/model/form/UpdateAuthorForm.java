@@ -11,6 +11,7 @@ public class UpdateAuthorForm {
     private String dateOfBirth;
     private String address;
     private String phoneNumber;
-
+    private String photoUrl;
+    private String photoFileName;
     private String status;
 }

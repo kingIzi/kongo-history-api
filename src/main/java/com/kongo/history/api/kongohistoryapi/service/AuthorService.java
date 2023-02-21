@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.model.form.AddAuthorForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindAuthorForm;
+import com.kongo.history.api.kongohistoryapi.repository.AbstractFirestoreRepository;
 import com.kongo.history.api.kongohistoryapi.repository.AuthorRepository;
 import com.kongo.history.api.kongohistoryapi.utils.AppConst;
 import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
@@ -40,7 +41,7 @@ public class AuthorService {
             throw new ValueDataException("Could not parse Date String. Please Ensure format is yyyy-MM-dd",AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var dateOfBirth = AppUtilities.convertStringFormatToDate(addAuthorForm.getDateOfBirth());
-        return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim());
+        return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim(),addAuthorForm.getPhotoUrl().trim(),addAuthorForm.getPhotoFileName().trim());
     }
  
 
@@ -48,14 +49,12 @@ public class AuthorService {
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{
             final var photoUrl = this.authorRepository.uploadFile(photo);
-            if (photoUrl != null && !photoUrl.isEmpty()){
-                addAuthorForm.setPhotoUrl(photoUrl);
-                final var saved = this.authorRepository.save(this.makeAuthor(addAuthorForm));
-                saved.ifPresentOrElse(httpDataResponse::setResponse, saved::orElseThrow);
-            }
-            else{
-                throw new ValueDataException("Failed to upload photo url. Please contact support",AppConst._KEY_CODE_INTERNAL_ERROR);
-            }
+            if (!photoUrl.isPresent())
+                throw new ValueDataException("Failed to upload photo file",AppConst._KEY_CODE_INTERNAL_ERROR);
+            addAuthorForm.setPhotoFileName((String) photoUrl.get().getFirst());
+            addAuthorForm.setPhotoUrl((String) photoUrl.get().getSecond());
+            final var saved = this.authorRepository.save(this.makeAuthor(addAuthorForm));
+            saved.ifPresentOrElse(httpDataResponse::setResponse, saved::orElseThrow);
         }
         catch(ValueDataException e){
             e.printStackTrace();
@@ -144,6 +143,10 @@ public class AuthorService {
                 values.put(Author.PHONE_NUMBER,updateAuthorForm.getPhoneNumber());
             if (AppUtilities.modifiableValue(author.getStatus(),updateAuthorForm.getStatus()))
                 values.put(Author.STATUS,updateAuthorForm.getStatus());
+            if (AppUtilities.modifiableValue(author.getPhotoUrl(), updateAuthorForm.getPhotoUrl()))
+                values.put(Author.PHOTO_URL,updateAuthorForm.getPhotoUrl());
+            if (AppUtilities.modifiableValue(author.getPhotoFileName(), updateAuthorForm.getPhotoFileName()))
+                values.put(Author.PHOTO_FILENAME,updateAuthorForm.getPhotoFileName());
             if (author.getDateOfBirth().isEmpty() && updateAuthorForm.getDateOfBirth() != null && !updateAuthorForm.getDateOfBirth().isBlank()){
                 final var date = AppUtilities.convertStringFormatToDate(updateAuthorForm.getDateOfBirth());
                 values.put(Author.DATE_OF_BIRTH,AppUtilities.convertDateToString(date));
@@ -156,18 +159,31 @@ public class AuthorService {
         return null;
     }
 
-    public HttpDataResponse<Author> updateAuthor(final String authorId,final UpdateAuthorForm addAuthorForm){
+    public HttpDataResponse<Author> updateAuthor(final String authorId,final MultipartFile photo,final UpdateAuthorForm updateAuthorForm){
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{
             final var author = this.findAuthor(authorId).getResponse();
             if (author == null)
                 throw new ValueDataException("Author not found", AppConst._KEY_CODE_PARAMS_ERROR);
-
-            final var newAuthor = this.updateAuthorValues(author,addAuthorForm);
+                
+            if (photo.isEmpty())
+                throw new ValueDataException("Failed to upload file",AppConst._KEY_CODE_INTERNAL_ERROR);
+            
+            final var photoUrl = this.authorRepository.uploadFile(photo);
+            if (photoUrl.isPresent()){
+                System.out.println(this.authorRepository.removeFile(author.getPhotoFileName()));
+                updateAuthorForm.setPhotoUrl((String) photoUrl.get().getSecond());
+                updateAuthorForm.setPhotoFileName((String) photoUrl.get().getFirst());
+            }
+            final var newAuthor = this.updateAuthorValues(author,updateAuthorForm);
             if (newAuthor != null){
                 this.authorRepository.save(authorId,newAuthor);
                 return this.findAuthor(authorId);
             }
+        }
+        catch(NoSuchElementException e){
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         catch(ValueDataException e){
             e.printStackTrace();
@@ -183,7 +199,15 @@ public class AuthorService {
     public HttpDataResponse<Author> removeAuthor(final String authorId){
         final var httpDataResponse = new HttpDataResponse<Author>();
         try{
-            this.authorRepository.delete(authorId);
+            final var author = this.findAuthor(authorId).getResponse();
+            if (author == null)
+                throw new ValueDataException("Sorry Author not found",AppConst._KEY_CODE_PARAMS_ERROR);
+            
+            final var authorPhoto = author.getPhotoFileName();
+            if (!authorPhoto.isBlank()){
+                this.authorRepository.removeFile(author.getPhotoFileName());
+                this.authorRepository.delete(authorId);
+            }
         }
         catch (Exception e){
             e.printStackTrace();

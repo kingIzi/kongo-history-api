@@ -62,10 +62,16 @@ public class AuthorResource implements AuthorInterface{
         return httpDataResponse;
     }
 
+    // @Override
+    // @PostMapping("/updateOne")
+    // public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId, @RequestBody UpdateAuthorForm updateAuthorForm) {
+    //     return this.authorService.updateAuthor(authorId,updateAuthorForm);
+    // }
+
     @Override
     @PostMapping("/updateOne")
-    public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId, @RequestBody UpdateAuthorForm updateAuthorForm) {
-        return this.authorService.updateAuthor(authorId,updateAuthorForm);
+    public HttpDataResponse<Author> updateAuthor(@RequestParam(required = true) String authorId,@RequestParam(value = "photo", required = false) MultipartFile photo,@ModelAttribute @Valid UpdateAuthorForm updateAuthorForm){
+        return this.authorService.updateAuthor(authorId,photo,updateAuthorForm);
     }
 
     @Override

@@ -22,16 +22,21 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.firebase.cloud.FirestoreClient;
+import com.google.firebase.cloud.StorageClient;
 import com.google.firebase.database.annotations.Nullable;
 import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
 //import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
 import com.kongo.history.api.kongohistoryapi.utils.DocumentId;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.common.reflect.TypeToken;
 
@@ -48,7 +53,8 @@ public class AbstractFirestoreRepository<T> {
     private final String collectionName;
     private final Class<T> parameterizedType;
     private final Storage storage;
-    private static final String BUCKET_NAME = "kongo-history-database.appspot.com";
+    public static final String BUCKET_NAME = "kongo-history-database.appspot.com";
+    public static final String PHOTOS = "photos";
 
     // protected AbstractFirestoreRepository(Firestore firestore, String collection) {
     //     this.collectionReference = firestore.collection(collection);
@@ -66,6 +72,17 @@ public class AbstractFirestoreRepository<T> {
     protected Class<T> getParameterizedType(){
         final var type = (ParameterizedType) this.getClass().getGenericSuperclass();
         return (Class<T>)type.getActualTypeArguments()[0];
+    }
+
+    @Getter
+    @Setter
+    public class Pair{
+        Object first;
+        Object second;
+        private Pair(final Object first,final Object second){
+            this.first = first;
+            this.second = second;
+        }
     }
 
     public final Optional<T> save(T model){
@@ -229,14 +246,14 @@ public class AbstractFirestoreRepository<T> {
         return String.format(DOWNLOAD_URL, AbstractFirestoreRepository.BUCKET_NAME,URLEncoder.encode(fileName, StandardCharsets.UTF_8));
     }
 
-    public String uploadFile(final MultipartFile file){
+    public Optional<Pair> uploadFile(final MultipartFile file){
         try{
             String fileName = file.getOriginalFilename();                        // to get original file name
             fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName)); 
             File newFile = this.convertToFile(file, fileName);                      // to convert multipartFile to File
             final var TEMP_URL = this.uploadFile(newFile, fileName,file.getContentType());                                   // to get uploaded file link
             newFile.delete();                         
-            return TEMP_URL;
+            return Optional.ofNullable(new Pair(fileName,TEMP_URL));
         }
         catch(IOException e){
             e.printStackTrace();
@@ -244,7 +261,12 @@ public class AbstractFirestoreRepository<T> {
         catch(Exception e){
             e.printStackTrace();
         }
-        return "";
+        return Optional.empty();
+    }
+
+    public boolean removeFile(final String fileName){
+        final var blobId = BlobId.of(AbstractFirestoreRepository.BUCKET_NAME, fileName);
+        return this.storage.delete(blobId);
     }
 
     //FILE DOWNLOAD
