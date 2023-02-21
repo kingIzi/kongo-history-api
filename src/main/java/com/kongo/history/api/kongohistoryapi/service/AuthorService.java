@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class AuthorService {
             throw new ValueDataException("Could not parse Date String. Please Ensure format is yyyy-MM-dd",AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var dateOfBirth = AppUtilities.convertStringFormatToDate(addAuthorForm.getDateOfBirth());
-        return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim(),addAuthorForm.getPhotoUrl().trim(),addAuthorForm.getPhotoFileName().trim());
+        return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(),dateOfBirth, addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim(),addAuthorForm.getPhotoUrl().trim(),addAuthorForm.getPhotoFileName().trim(),new Date(),new Date());
     }
  
 
@@ -147,11 +148,12 @@ public class AuthorService {
                 values.put(Author.PHOTO_URL,updateAuthorForm.getPhotoUrl());
             if (AppUtilities.modifiableValue(author.getPhotoFileName(), updateAuthorForm.getPhotoFileName()))
                 values.put(Author.PHOTO_FILENAME,updateAuthorForm.getPhotoFileName());
-            if (author.getDateOfBirth().isEmpty() && updateAuthorForm.getDateOfBirth() != null && !updateAuthorForm.getDateOfBirth().isBlank()){
-                final var date = AppUtilities.convertStringFormatToDate(updateAuthorForm.getDateOfBirth());
-                values.put(Author.DATE_OF_BIRTH,AppUtilities.convertDateToString(date));
-            }
-            return values.isEmpty() ? null : values;
+            if (author.getDateOfBirth().isEmpty() && updateAuthorForm.getDateOfBirth() != null && !updateAuthorForm.getDateOfBirth().isBlank())
+                values.put(Author.DATE_OF_BIRTH,AppUtilities.convertDateToString(AppUtilities.convertStringFormatToDate(updateAuthorForm.getDateOfBirth())));
+            if (!values.isEmpty())
+                values.put(Author.DATE_UPDATED, AppUtilities.convertDateToString(new Date()));
+            
+            return values;
         }
         catch (DateTimeParseException e){
             e.printStackTrace();

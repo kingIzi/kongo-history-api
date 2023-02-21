@@ -22,6 +22,8 @@ public class Author extends BaseEntity {
     public static final String STATUS = "status";
     public static final String PHOTO_URL = "photoUrl";
     public static final String PHOTO_FILENAME = "photoFileName";
+    public static final String DATE_CREATED = "dateCreated";
+    public static final String DATE_UPDATED = "dateUpdated";
 
 
     @DocumentId
@@ -36,8 +38,10 @@ public class Author extends BaseEntity {
     private String status = "ON";
     private String photoUrl;
     private String photoFileName;
+    private String dateCreated;
+    private String dataUpdated;
 
-    public Author(final String firstName,final String lastName,final Date dateOfBirth,final String address,final String phoneNumber,final String photoUrl,final String photoFileName){
+    public Author(final String firstName,final String lastName,final Date dateOfBirth,final String address,final String phoneNumber,final String photoUrl,final String photoFileName,final Date dateCreated,final Date dateUpdated){
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = AppUtilities.convertDateToString(dateOfBirth);
@@ -45,6 +49,8 @@ public class Author extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.photoUrl = photoUrl;
         this.photoFileName = photoFileName;
+        this.dateCreated = AppUtilities.convertDateToString(dateCreated);
+        this.dataUpdated = AppUtilities.convertDateToString(dateUpdated);
     }
 
     public Author(){}
