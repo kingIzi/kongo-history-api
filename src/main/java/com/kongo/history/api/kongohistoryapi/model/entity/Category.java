@@ -15,9 +15,9 @@ public class Category extends BaseEntity {
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
-    public static final String THUMBNAIL_URL = "dateOfBirth";
-    public static final String THUMBNAIL_FILENAME = "dateOfBirth";
-    public static final String COLOR = "address";
+    public static final String THUMBNAIL_URL = "thumbnailUrl";
+    public static final String THUMBNAIL_FILENAME = "thumbnailFileName";
+    public static final String COLOR = "color";
     public static final String STATUS = "status";
     public static final String DATE_CREATED = "dateCreated";
     public static final String DATE_UPDATED = "dateUpdated";
@@ -44,4 +44,6 @@ public class Category extends BaseEntity {
         this.dateCreated = AppUtilities.convertDateToString(new Date());
         this.dateUpdated = AppUtilities.convertDateToString(new Date());
     }
+
+    public Category() {}
 }

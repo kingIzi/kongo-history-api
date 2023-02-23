@@ -76,12 +76,14 @@ public class AuthorService {
     public HttpDataResponse<Author> findAuthor(final String documentId) {
         final var httpDataResponse = new HttpDataResponse<Author>();
         try {
-            final var author = this.authorRepository.get(documentId);
-            author.ifPresentOrElse(httpDataResponse::setResponse, author::orElseThrow);
-        } catch (NoSuchElementException e) {
+            final var author = this.authorRepository.get(documentId).orElseThrow(AppUtilities.supplyException("Author not found",AppConst._KEY_CODE_PARAMS_ERROR));
+            httpDataResponse.setResponse(author);
+        }
+        catch (ValueDataException e){
             e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
-        } catch (Exception e) {
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,e);
+        }
+        catch (Exception e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
@@ -164,21 +166,19 @@ public class AuthorService {
             if (author == null)
                 throw new ValueDataException("Author not found", AppConst._KEY_CODE_PARAMS_ERROR);
 
-            if (!photo.isEmpty()) {
-                final var photoUrl = this.authorRepository.uploadFile(photo);
-                final var isRemovedOldPhoto = this.authorRepository.removeFile(author.getPhotoFileName());
-                updateAuthorForm.setPhotoUrl((String) photoUrl.get().getSecond());
-                updateAuthorForm.setPhotoFileName((String) photoUrl.get().getFirst());
+            if (photo != null && !photo.isEmpty()) {
+                final var photoUrl = this.authorRepository.uploadFile(photo).orElseThrow(AppUtilities.supplyException("Failed to upload file",AppConst._KEY_CODE_INTERNAL_ERROR));
+                this.authorRepository.removeFile(author.getPhotoFileName());
+                updateAuthorForm.setPhotoUrl((String) photoUrl.getSecond());
+                updateAuthorForm.setPhotoFileName((String) photoUrl.getFirst());
             }
             final var newAuthor = this.updateAuthorValues(author, updateAuthorForm);
             if (newAuthor != null) {
                 this.authorRepository.save(authorId, newAuthor);
                 return this.findAuthor(authorId);
             }
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
-        } catch (ValueDataException e) {
+        }
+        catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {

@@ -264,9 +264,10 @@ public class AbstractFirestoreRepository<T> {
         return Optional.empty();
     }
 
-    public boolean removeFile(final String fileName){
+    public void removeFile(final String fileName) throws ValueDataException{
         final var blobId = BlobId.of(AbstractFirestoreRepository.BUCKET_NAME, fileName);
-        return this.storage.delete(blobId);
+        if (!this.storage.delete(blobId))
+            throw new ValueDataException("Failed to remove file. FileName: " + fileName);
     }
 
     //FILE DOWNLOAD

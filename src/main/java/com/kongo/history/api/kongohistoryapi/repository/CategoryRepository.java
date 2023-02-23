@@ -65,6 +65,7 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
             throw new ValueDataException("Limit is too small. Must be at least 10.", AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
+        System.out.println(querySnapshot.getDocuments().size());
         return Optional.of(this.makeListFromQuerySnapshots(querySnapshot));
     }
 
