@@ -55,7 +55,6 @@ security:
     - Id-Token
   allowed-public-apis:
     - /favicon.ico
-    - /session/login
-    - /public/**
+    - /session/**
   exposed-headers:
     - X-Xsrf-Token

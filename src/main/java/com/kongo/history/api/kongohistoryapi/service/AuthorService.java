@@ -76,21 +76,20 @@ public class AuthorService {
     public HttpDataResponse<Author> findAuthor(final String documentId) {
         final var httpDataResponse = new HttpDataResponse<Author>();
         try {
-            final var author = this.authorRepository.get(documentId).orElseThrow(AppUtilities.supplyException("Author not found",AppConst._KEY_CODE_PARAMS_ERROR));
+            final var author = this.authorRepository.get(documentId)
+                    .orElseThrow(AppUtilities.supplyException("Author not found", AppConst._KEY_CODE_PARAMS_ERROR));
             httpDataResponse.setResponse(author);
-        }
-        catch (ValueDataException e){
+        } catch (ValueDataException e) {
             e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse,e);
-        }
-        catch (Exception e) {
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        } catch (Exception e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
         return httpDataResponse;
     }
 
-    public HttpDataResponse<List<Author>> getAuthorList(@Value("10") final int limit) {
+    public HttpDataResponse<List<Author>> getAuthorList(final int limit) {
         final var httpDataResponse = new HttpDataResponse<List<Author>>();
         try {
             final var data = this.authorRepository.searchByCriteria(limit);
@@ -167,7 +166,8 @@ public class AuthorService {
                 throw new ValueDataException("Author not found", AppConst._KEY_CODE_PARAMS_ERROR);
 
             if (photo != null && !photo.isEmpty()) {
-                final var photoUrl = this.authorRepository.uploadFile(photo).orElseThrow(AppUtilities.supplyException("Failed to upload file",AppConst._KEY_CODE_INTERNAL_ERROR));
+                final var photoUrl = this.authorRepository.uploadFile(photo).orElseThrow(
+                        AppUtilities.supplyException("Failed to upload file", AppConst._KEY_CODE_INTERNAL_ERROR));
                 this.authorRepository.removeFile(author.getPhotoFileName());
                 updateAuthorForm.setPhotoUrl((String) photoUrl.getSecond());
                 updateAuthorForm.setPhotoFileName((String) photoUrl.getFirst());
@@ -177,8 +177,7 @@ public class AuthorService {
                 this.authorRepository.save(authorId, newAuthor);
                 return this.findAuthor(authorId);
             }
-        }
-        catch (ValueDataException e) {
+        } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {
