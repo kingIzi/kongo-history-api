@@ -1,6 +1,7 @@
 package com.kongo.history.api.kongohistoryapi.controller;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.User;
+import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
 import com.kongo.history.api.kongohistoryapi.service.SessionService;
 import com.kongo.history.api.kongohistoryapi.service.UserService;
@@ -40,8 +41,8 @@ public class UserResource {
 
     @PostMapping("/list")
     public HttpDataResponse<List<User>> getUsersList(@RequestParam(required = false) final Integer limit,
-            final @RequestBody UpdateUserForm updateUserForm) {
-        return new HttpDataResponse<>();
+            final @RequestBody FindUserForm findUserForm) {
+        return this.userService.getUsersList(limit,findUserForm);
     }
 
     @GetMapping("/findOne")
@@ -52,7 +53,7 @@ public class UserResource {
     @PutMapping("/updateOne")
     public HttpDataResponse<User> updateUser(@RequestParam(required = true) final String userId,
             @RequestParam(required = false) MultipartFile photo, @ModelAttribute UpdateUserForm updateUserForm) {
-        return new HttpDataResponse<>();
+        return this.userService.updateUser(userId,photo,updateUserForm);
     }
 
     @PostMapping("/update/favorites")
@@ -60,4 +61,6 @@ public class UserResource {
             @RequestParam(required = true) final String comicId) {
         return new HttpDataResponse<>();
     }
+
+
 }

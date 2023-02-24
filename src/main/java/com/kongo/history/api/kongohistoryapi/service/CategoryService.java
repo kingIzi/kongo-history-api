@@ -124,10 +124,9 @@ public class CategoryService {
                 updateCategoryForm.setThumbnailFileName((String) thumbnailUrl.getFirst());
             }
             final var newCategory = this.updatedCategoryValues(category, updateCategoryForm);
-            if (newCategory != null) {
-                this.categoryRepository.save(categoryId, newCategory);
+            if (this.categoryRepository.save(categoryId, newCategory))
                 return this.findCategory(categoryId);
-            }
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,"No items found to update",AppConst._KEY_MSG_SUCCESS);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);

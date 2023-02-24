@@ -52,7 +52,7 @@ public class AuthorService {
         try {
             if (photo.isEmpty())
                 throw new ValueDataException("Please provide a photo for the author.",
-                        AppConst._KEY_CODE_INTERNAL_ERROR);
+                        AppConst._KEY_CODE_PARAMS_ERROR);
             final var photoUrl = this.authorRepository.uploadFile(photo);
             if (!photoUrl.isPresent())
                 throw new ValueDataException("Failed to upload photo file", AppConst._KEY_CODE_INTERNAL_ERROR);
@@ -111,11 +111,8 @@ public class AuthorService {
             final FindAuthorForm findAuthorForm) {
         final var httpDataResponse = new HttpDataResponse<List<Author>>();
         try {
-            final var data = this.authorRepository.searchByCriteria(limit, findAuthorForm);
-            data.ifPresentOrElse(httpDataResponse::setResponse, data::orElseThrow);
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+            final var authors = this.authorRepository.searchByCriteria(limit, findAuthorForm);
+            authors.ifPresentOrElse(httpDataResponse::setResponse, authors::orElseThrow);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
@@ -143,8 +140,7 @@ public class AuthorService {
                 values.put(Author.PHOTO_URL, updateAuthorForm.getPhotoUrl());
             if (AppUtilities.modifiableValue(author.getPhotoFileName(), updateAuthorForm.getPhotoFileName()))
                 values.put(Author.PHOTO_FILENAME, updateAuthorForm.getPhotoFileName());
-            if (author.getDateOfBirth().isEmpty() && updateAuthorForm.getDateOfBirth() != null
-                    && !updateAuthorForm.getDateOfBirth().isBlank())
+            if (updateAuthorForm.getDateOfBirth() != null && !updateAuthorForm.getDateOfBirth().isBlank())
                 values.put(Author.DATE_OF_BIRTH, AppUtilities.convertDateToString(
                         AppUtilities.convertStringFormatToDate(updateAuthorForm.getDateOfBirth())));
             if (!values.isEmpty())
@@ -169,14 +165,13 @@ public class AuthorService {
                 final var photoUrl = this.authorRepository.uploadFile(photo).orElseThrow(
                         AppUtilities.supplyException("Failed to upload file", AppConst._KEY_CODE_INTERNAL_ERROR));
                 this.authorRepository.removeFile(author.getPhotoFileName());
-                updateAuthorForm.setPhotoUrl((String) photoUrl.getSecond());
-                updateAuthorForm.setPhotoFileName((String) photoUrl.getFirst());
+                updateAuthorForm.setPhotoUrl(photoUrl.getSecond());
+                updateAuthorForm.setPhotoFileName(photoUrl.getFirst());
             }
             final var newAuthor = this.updateAuthorValues(author, updateAuthorForm);
-            if (newAuthor != null) {
-                this.authorRepository.save(authorId, newAuthor);
+            if (this.authorRepository.save(authorId, newAuthor))
                 return this.findAuthor(authorId);
-            }
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,"No items found to update",AppConst._KEY_MSG_SUCCESS);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
@@ -190,12 +185,10 @@ public class AuthorService {
     public HttpDataResponse<Author> removeAuthor(final String authorId) {
         final var httpDataResponse = new HttpDataResponse<Author>();
         try {
-            final var author = this.findAuthor(authorId).getResponse();
-            if (author == null)
-                throw new ValueDataException("Sorry Author not found", AppConst._KEY_CODE_PARAMS_ERROR);
+            final var author = this.authorRepository.get(authorId)
+                    .orElseThrow(AppUtilities.supplyException("Author not found", AppConst._KEY_CODE_PARAMS_ERROR));
 
-            final var authorPhoto = author.getPhotoFileName();
-            if (!authorPhoto.isBlank()) {
+            if (!author.getPhotoFileName().isBlank()) {
                 this.authorRepository.removeFile(author.getPhotoFileName());
                 this.authorRepository.delete(authorId);
             }

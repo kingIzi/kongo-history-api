@@ -1,7 +1,12 @@
 package com.kongo.history.api.kongohistoryapi.service;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
+import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +19,9 @@ import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 import com.kongo.history.api.kongohistoryapi.utils.UtilityFormatter;
 import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
 import com.kongo.history.api.kongohistoryapi.utils.AppConst;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -23,7 +31,7 @@ public class UserService {
 
     public void addNewUser(final RegisterForm registerForm, final LoginResponse loginResponse) {
         final var user = new User(registerForm.getFullName(), registerForm.getPhoneNumber(),
-                loginResponse.getEmail(), loginResponse.getLocalId());
+                loginResponse.getEmail(), loginResponse.getLocalId(),new Date(),new Date());
         try {
             final var saved = this.userRepository.save(user)
                     .orElseThrow(
@@ -49,6 +57,22 @@ public class UserService {
         return httpDataResponse;
     }
 
+    public HttpDataResponse<List<User>> getUsersList(final Integer limit, final FindUserForm findUserForm){
+        final var httpDataResponse = new HttpDataResponse<List<User>>();
+        try{
+            final var users = this.userRepository.searchByCriteria(limit, findUserForm).orElseThrow(AppUtilities.supplyException("Failed to retrieve users. Please contact support.", AppConst._KEY_CODE_INTERNAL_ERROR));
+            httpDataResponse.setResponse(users);
+        }
+        catch (ValueDataException e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+
     public HttpDataResponse<User> findUser(final String userId) {
         final var httpDataResponse = new HttpDataResponse<User>();
         try {
@@ -59,6 +83,48 @@ public class UserService {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+
+    private Map<String,Object> updateUserValues(final User user,final UpdateUserForm updateUserForm){
+        final var values = new HashMap<String, Object>();
+        if (AppUtilities.modifiableValue(user.getEmail(),updateUserForm.getEmail()))
+            values.put(User.EMAIL,updateUserForm.getEmail());
+        if (AppUtilities.modifiableValue(user.getPhotoUrl(),updateUserForm.getPhotoUrl()))
+            values.put(User.PHOTO_URL,updateUserForm.getPhotoUrl());
+        if (AppUtilities.modifiableValue(user.getPhotoFileName(),updateUserForm.getPhotoFileName()))
+            values.put(User.PHOTO_FILENAME,updateUserForm.getPhotoFileName());
+        if (AppUtilities.modifiableValue(user.getPhoneNumber(),updateUserForm.getPhoneNumber()))
+            values.put(User.PHONE_NUMBER,updateUserForm.getPhoneNumber());
+        if (updateUserForm.getFavorites() != null)
+            values.put(User.FAVORITES,updateUserForm.getFavorites());
+        if (!values.isEmpty())
+            values.put(User.DATE_UPDATED,new Date());
+        return values;
+    }
+
+    public HttpDataResponse<User> updateUser(final String userId, final MultipartFile photo, final UpdateUserForm updateUserForm){
+        final var httpDataResponse = new HttpDataResponse<User>();
+        try {
+            final var user = this.userRepository.get(userId).orElseThrow(AppUtilities.supplyException("Failed to find user userId = " + userId, AppConst._KEY_CODE_PARAMS_ERROR));
+            if (photo != null && !photo.isEmpty()){
+                final var uploadedFile = this.userRepository.uploadFile(photo).orElseThrow(AppUtilities.supplyException("Failed to upload user photo",AppConst._KEY_CODE_INTERNAL_ERROR));
+                updateUserForm.setPhotoUrl(uploadedFile.getSecond());
+                updateUserForm.setPhotoFileName(uploadedFile.getFirst());
+            }
+            final var updatedUser = this.updateUserValues(user,updateUserForm);
+            if (this.userRepository.save(userId,updatedUser))
+                return this.findUser(userId);
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse,"No items found to update",AppConst._KEY_MSG_SUCCESS);
+        }
+        catch (ValueDataException e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        }
+        catch (Exception e){
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }

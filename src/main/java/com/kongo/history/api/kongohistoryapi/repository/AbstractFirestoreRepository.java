@@ -8,43 +8,28 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import com.kongo.history.api.kongohistoryapi.utils.AppConst;
 import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.api.core.ApiFuture;
+import com.google.firebase.database.utilities.Pair;
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.cloud.FirestoreClient;
-import com.google.firebase.cloud.StorageClient;
 import com.google.firebase.database.annotations.Nullable;
 import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
 //import com.kongo.history.api.kongohistoryapi.model.entity.BaseEntity;
 import com.kongo.history.api.kongohistoryapi.utils.DocumentId;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import com.google.cloud.firestore.WriteResult;
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
-import com.google.common.reflect.TypeToken;
 
-import javax.validation.ValidationException;
-import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+
 
 
 @Slf4j
@@ -55,12 +40,6 @@ public class AbstractFirestoreRepository<T> {
     private final Storage storage;
     public static final String BUCKET_NAME = "kongo-history-database.appspot.com";
     public static final String PHOTOS = "photos";
-
-    // protected AbstractFirestoreRepository(Firestore firestore, String collection) {
-    //     this.collectionReference = firestore.collection(collection);
-    //     this.collectionName = collection;
-    //     this.parameterizedType = this.getParameterizedType();
-    // }
 
     protected AbstractFirestoreRepository(Firestore firestore,String collectionName,Storage storage){
         this.collectionReference = firestore.collection(collectionName);
@@ -74,28 +53,12 @@ public class AbstractFirestoreRepository<T> {
         return (Class<T>)type.getActualTypeArguments()[0];
     }
 
-    @Getter
-    @Setter
-    public class Pair{
-        Object first;
-        Object second;
-        private Pair(final Object first,final Object second){
-            this.first = first;
-            this.second = second;
-        }
-    }
-
     public final Optional<T> save(T model){
         final var documentId = this.getDocumentId(model);
         try {
-            if (documentId.isEmpty())
-                throw new Exception("SOMETHING WENT WRONG PLEASE CONTACT SUPPORT!");
-            
-            ((BaseEntity) model).setId(documentId);
             final var resultApiFuture = collectionReference.document(documentId).set(model);
             log.info("{}-{} saved at{}", collectionName, documentId, resultApiFuture.get().getUpdateTime());
             return Optional.of(model);
-            //return model;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error saving {}={} {}", collectionName, documentId, e.getMessage());
         }
@@ -106,13 +69,11 @@ public class AbstractFirestoreRepository<T> {
         return Optional.empty();
     }
 
-    public final void save(final String documentId,final Map<String,Object> model){
+    public final boolean save(final String documentId,final Map<String,Object> model){
         try {
-            if (documentId.isEmpty())
-                throw new Exception("SOMETHING WENT WRONG. DOCUMENT_ID WAS NULL FOR UPDATE");
-
             final var resultApiFuture = collectionReference.document(documentId).update(model);
             log.info("{}-{} saved at{}", collectionName, documentId, resultApiFuture.get().getUpdateTime());
+            return true;
         } catch (InterruptedException | ExecutionException e) {
             log.error("Error saving {}={} {}", collectionName, documentId, e.getMessage());
         }
@@ -120,6 +81,7 @@ public class AbstractFirestoreRepository<T> {
             e.printStackTrace();
             log.error("Error handling {}",e.getMessage());
         }
+        return false;
     }
 
     public void delete(T model){
@@ -246,17 +208,16 @@ public class AbstractFirestoreRepository<T> {
         return String.format(DOWNLOAD_URL, AbstractFirestoreRepository.BUCKET_NAME,URLEncoder.encode(fileName, StandardCharsets.UTF_8));
     }
 
-    public Optional<Pair> uploadFile(final MultipartFile file){
+    public Optional<Pair<String,String>> uploadFile(final MultipartFile file){
         try{
             String fileName = file.getOriginalFilename();                        // to get original file name
-            fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName)); 
-            File newFile = this.convertToFile(file, fileName);                      // to convert multipartFile to File
+            assert fileName != null;
+            fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
+            final var newFile = this.convertToFile(file, fileName);                      // to convert multipartFile to File
+            assert newFile != null;
             final var TEMP_URL = this.uploadFile(newFile, fileName,file.getContentType());                                   // to get uploaded file link
-            newFile.delete();                         
-            return Optional.ofNullable(new Pair(fileName,TEMP_URL));
-        }
-        catch(IOException e){
-            e.printStackTrace();
+            final var isDeleted = newFile.delete();
+            return Optional.of(new Pair<>(fileName,TEMP_URL));
         }
         catch(Exception e){
             e.printStackTrace();

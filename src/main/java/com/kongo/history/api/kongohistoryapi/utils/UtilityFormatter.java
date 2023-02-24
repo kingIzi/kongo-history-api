@@ -13,4 +13,9 @@ public class UtilityFormatter {
         httpDataResponse.getStatus().setCode(AppConst._KEY_CODE_INTERNAL_ERROR);
         httpDataResponse.getStatus().setMessage("SOMETHING WENT WRONG");
     }
+
+    public static void formatMessagesParamsError(HttpDataResponse<?> httpDataResponse,String message,String code){
+        httpDataResponse.getStatus().setCode(code);
+        httpDataResponse.getStatus().setMessage(message);
+    }
 }

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Optional;
 
+import com.google.firebase.database.utilities.Pair;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
 import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
 import org.springframework.stereotype.Repository;
@@ -34,91 +35,58 @@ public class AuthorRepository extends AbstractFirestoreRepository<Author> {
         super(firestore, AuthorRepository.NAME, storage);
     }
 
-    private class KeyValue<V> {
-        private String key;
-        private V value;
-
-        private KeyValue(String key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        private void setKey(final String key) {
-            this.key = key;
-        }
-
-        private String getKey() {
-            return this.key;
-        }
-
-        private void setValue(final V value) {
-            this.value = value;
-        }
-
-        private V getValue() {
-            return this.value;
-        }
-    }
-
-    private final List<KeyValue> getFindAuthorFormData(final FindAuthorForm findAuthorForm) {
-        List<KeyValue> values = new ArrayList();
-        values.add(new KeyValue<>(Author.STATUS, findAuthorForm.getStatus()));
+    private List<Pair<String,Object>> getFindAuthorFormData(final FindAuthorForm findAuthorForm){
+        List<Pair<String,Object>> values = new ArrayList<>();
+        values.add(new Pair<>(Author.STATUS, findAuthorForm.getStatus()));
         if (findAuthorForm.getId() != null && !findAuthorForm.getId().isBlank())
-            values.add(new KeyValue<>(Author.ID, findAuthorForm.getId()));
+            values.add(new Pair<>(Author.ID, findAuthorForm.getId()));
         if (findAuthorForm.getFirstName() != null && !findAuthorForm.getFirstName().isBlank())
-            values.add(new KeyValue<>(Author.FIRST_NAME, findAuthorForm.getFirstName()));
+            values.add(new Pair<>(Author.FIRST_NAME, findAuthorForm.getFirstName()));
         if (findAuthorForm.getLastName() != null && !findAuthorForm.getLastName().isBlank())
-            values.add(new KeyValue<>(Author.LAST_NAME, findAuthorForm.getLastName()));
+            values.add(new Pair<>(Author.LAST_NAME, findAuthorForm.getLastName()));
 
         return values;
     }
 
     public Optional<List<Author>> searchByCriteria(final int limit, final FindAuthorForm findAuthorForm)
-            throws ValueDataException, Exception {
+            throws Exception {
         final var values = this.getFindAuthorFormData(findAuthorForm);
-        if (limit < 10)
-            throw new ValueDataException("Limit is too small. Must be at least 10.", AppConst._KEY_CODE_PARAMS_ERROR);
-        if (values.isEmpty())
-            throw new ValueDataException("SOMETHING WENT WRONG! FindAuthorForm is empty",
-                    AppConst._KEY_CODE_PARAMS_ERROR);
+
         if (values.size() == 1) {
             final var query = this.getCollectionReference()
-                    .whereEqualTo(values.get(0).getKey(), values.get(0).getValue()).limit(limit);
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit);
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
         }
         if (values.size() == 2) {
             final var query = this.getCollectionReference()
-                    .whereEqualTo(values.get(0).getKey(), values.get(0).getValue())
-                    .whereEqualTo(values.get(1).getKey(), values.get(1).getValue());
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
         }
         if (values.size() == 3) {
             final var query = this.getCollectionReference()
-                    .whereEqualTo(values.get(0).getKey(), values.get(0).getValue())
-                    .whereEqualTo(values.get(1).getKey(), values.get(1).getValue())
-                    .whereEqualTo(values.get(2).getKey(), values.get(2).getValue());
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond())
+                    .whereEqualTo(values.get(2).getFirst(), values.get(2).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
         }
         if (values.size() == 4) {
             final var query = this.getCollectionReference()
-                    .whereEqualTo(values.get(0).getKey(), values.get(0).getValue())
-                    .whereEqualTo(values.get(1).getKey(), values.get(1).getValue())
-                    .whereEqualTo(values.get(2).getKey(), values.get(2).getValue())
-                    .whereEqualTo(values.get(3).getKey(), values.get(3).getValue());
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond())
+                    .whereEqualTo(values.get(2).getFirst(), values.get(2).getSecond())
+                    .whereEqualTo(values.get(3).getFirst(), values.get(3).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
         }
         return Optional.empty();
     }
 
-    public Optional<List<Author>> searchByCriteria(final int limit) throws ValueDataException, Exception {
-        if (limit < 10)
-            throw new ValueDataException("Limit is too small. Must be at least 10.", AppConst._KEY_CODE_PARAMS_ERROR);
-
-        final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
+    public Optional<List<Author>> searchByCriteria(final Integer limit) throws ValueDataException, Exception {
+        final var querySnapshot = this.getCollectionReference().limit(limit == null ? 100 : limit).get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
     }
 

@@ -1,5 +1,6 @@
 package com.kongo.history.api.kongohistoryapi.utils;
 
+import javax.validation.constraints.Null;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -29,11 +30,18 @@ public class AppUtilities {
     }
 
     public static boolean modifiableValue(final String valueData,final String formData){
-        return formData != null && !Objects.equals(valueData,formData);
+        try{
+            return !formData.isEmpty();
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
+        return false;
     }
+
+
 
     public static Supplier<ValueDataException> supplyException(final String message,final String code){
         return () -> new ValueDataException(message,code);
     }
-
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
+import com.google.firebase.database.utilities.Pair;
 import org.springframework.stereotype.Repository;
 
 import com.google.cloud.firestore.Firestore;
@@ -51,11 +52,11 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
         }
     }
 
-    private final List<KeyValue> getFindCategoryForm(final FindCategoryForm findCategoryForm) {
-        List<KeyValue> values = new ArrayList<>();
+    private List<Pair<String,Object>> getFindCategoryForm(final FindCategoryForm findCategoryForm) {
+        List<Pair<String,Object>> values = new ArrayList<>();
 
-        values.add(new KeyValue<>(Category.STATUS, findCategoryForm.getStatus()));
-        values.add(new KeyValue<>(Category.NAME, findCategoryForm.getName()));
+        values.add(new Pair<>(Category.STATUS, findCategoryForm.getStatus()));
+        values.add(new Pair<>(Category.NAME, findCategoryForm.getName()));
 
         return values;
     }
@@ -79,8 +80,8 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
                     AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var query = this.getCollectionReference()
-                .whereEqualTo(values.get(0).getKey(), values.get(0).getValue())
-                .whereEqualTo(values.get(1).getKey(), values.get(1).getValue());
+                .whereEqualTo(values.get(0).getFirst(), values.get(0).getFirst())
+                .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond());
         final var querySnapshot = query.get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
     }
