@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
@@ -76,4 +75,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
+
 }
