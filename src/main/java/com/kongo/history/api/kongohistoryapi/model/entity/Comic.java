@@ -49,14 +49,22 @@ public class Comic extends BaseEntity {
     @Pattern(regexp = "ON|OFF")
     private String status;
 
-    public Comic(){}
+    public Comic() {
+    }
 
-    public Comic(final String name, final Date dateReleased, final String description,final String authorId,final List<String> categories){
+    public Comic(final String name, final Date dateReleased, final String description, final String authorId,
+            final List<String> categories, final String thumbnailFileName, final String thumbnailUrl,
+            final String dataFileName,
+            final String dataUrl) {
         this.name = name;
         this.dateReleased = AppUtilities.convertDateToString(dateReleased);
         this.description = description;
         this.authorId = authorId;
         this.categories = categories;
+        this.thumbnailFileName = thumbnailFileName;
+        this.thumbnailUrl = thumbnailUrl;
+        this.dataFileName = dataFileName;
+        this.dataUrl = dataUrl;
         this.dateCreated = AppUtilities.convertDateToString(new Date());
         this.dataUpdated = AppUtilities.convertDateToString(new Date());
         this.status = "ON";
