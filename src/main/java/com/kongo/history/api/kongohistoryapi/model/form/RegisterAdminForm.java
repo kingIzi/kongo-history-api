@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class RegisterForm {
+public class RegisterAdminForm {
     @NotBlank
     private String email;
     @NotBlank
@@ -13,5 +13,7 @@ public class RegisterForm {
     @NotBlank
     private String fullName;
     private String phoneNumber;
+    @NotBlank
+    private String role;
     private final boolean returnSecureToken = true;
 }

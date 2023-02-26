@@ -3,7 +3,7 @@ package com.kongo.history.api.kongohistoryapi.controller;
 //app imports
 import com.kongo.history.api.kongohistoryapi.auth.models.User;
 import com.kongo.history.api.kongohistoryapi.model.form.LoginForm;
-import com.kongo.history.api.kongohistoryapi.model.form.RegisterForm;
+import com.kongo.history.api.kongohistoryapi.model.form.RegisterUserForm;
 import com.kongo.history.api.kongohistoryapi.model.response.LoginResponse;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 import com.kongo.history.api.kongohistoryapi.service.SessionService;
@@ -28,7 +28,7 @@ public class SessionResource {
     }
 
     @PostMapping("/register")
-    public HttpDataResponse<LoginResponse> registerUser(@Valid @RequestBody RegisterForm registerForm) {
+    public HttpDataResponse<LoginResponse> registerUser(@Valid @RequestBody RegisterUserForm registerForm) {
         return this.sessionService.register(registerForm);
     }
 }

@@ -26,7 +26,6 @@ public class User extends BaseEntity {
     public static final String DATE_UPDATED = "dateUpdated";
     public static final String STATUS = "status";
 
-
     @DocumentId
     private String id;
     private String fullName;
@@ -38,15 +37,19 @@ public class User extends BaseEntity {
     private List<String> favorites;
     private String dateCreated;
     private String dateUpdated;
+    private String role;
     @Pattern(regexp = "ON|OFF")
     private String status = "ON";
 
-    public User(final String fullName, final String phoneNumber, final String email, final String localId, final Date dateCreaded, final Date dateUpdated) {
+    public User(final String fullName, final String phoneNumber, final String email, final String localId,
+            final String role,
+            final Date dateCreaded, final Date dateUpdated) {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.localId = localId;
         this.favorites = new ArrayList<>();
         this.email = email;
+        this.role = role;
         this.dateCreated = AppUtilities.convertDateToString(dateCreaded);
         this.dateUpdated = AppUtilities.convertDateToString(dateUpdated);
     }

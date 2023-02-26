@@ -2,7 +2,8 @@ package com.kongo.history.api.kongohistoryapi.service;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.User;
 import com.kongo.history.api.kongohistoryapi.model.form.LoginForm;
-import com.kongo.history.api.kongohistoryapi.model.form.RegisterForm;
+import com.kongo.history.api.kongohistoryapi.model.form.RegisterAdminForm;
+import com.kongo.history.api.kongohistoryapi.model.form.RegisterUserForm;
 import com.kongo.history.api.kongohistoryapi.model.response.LoginResponse;
 import com.kongo.history.api.kongohistoryapi.repository.UserRepository;
 import com.kongo.history.api.kongohistoryapi.utils.AppConst;
@@ -52,7 +53,7 @@ public class SessionService {
         return httpDataResponse;
     }
 
-    public HttpDataResponse<LoginResponse> register(final RegisterForm registerForm) {
+    public HttpDataResponse<LoginResponse> register(final RegisterUserForm registerForm) {
         final var httpDataResponse = new HttpDataResponse<LoginResponse>();
         try {
             final var headers = new HttpHeaders();
@@ -67,6 +68,31 @@ public class SessionService {
                 @Override
                 public void run() {
                     userService.addNewUser(registerForm, body);
+                }
+            });
+            signUp.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+
+    public HttpDataResponse<LoginResponse> register(final RegisterAdminForm registerForm) {
+        final var httpDataResponse = new HttpDataResponse<LoginResponse>();
+        try {
+            final var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            final var request = new HttpEntity<>(registerForm, headers);
+            final var response = this.restTemplate.postForEntity(SessionService.SIGN_UP_WITH_EMAIL_PASSWORD, request,
+                    LoginResponse.class);
+            registerForm.setPassword("");
+            final var body = response.getBody();
+            httpDataResponse.setResponse(body);
+            final var signUp = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    userService.addNewAdmin(registerForm, body);
                 }
             });
             signUp.start();
