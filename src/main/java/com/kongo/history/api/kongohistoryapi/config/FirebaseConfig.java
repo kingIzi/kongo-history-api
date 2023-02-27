@@ -30,8 +30,6 @@ public class FirebaseConfig {
     @Autowired
     SecurityProperties secProps;
 
-    private InputStream inputStream;
-
     public static final String FIREBASE_PATH = "firebase_config.json";
 
     @Primary

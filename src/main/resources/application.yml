@@ -56,5 +56,6 @@ security:
   allowed-public-apis:
     - /favicon.ico
     - /session/**
+    - /swagger2-demo/**
   exposed-headers:
     - X-Xsrf-Token
