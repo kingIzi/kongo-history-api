@@ -1,17 +1,15 @@
 package com.kongo.history.api.kongohistoryapi.repository;
 
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Optional;
 
 import com.google.firebase.database.utilities.Pair;
+import com.kongo.history.api.kongohistoryapi.model.entity.Comic;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
 import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
 import org.springframework.stereotype.Repository;

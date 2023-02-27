@@ -1,24 +1,26 @@
 package com.kongo.history.api.kongohistoryapi.service;
 
+import com.google.firebase.database.utilities.Pair;
+import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.model.entity.Comic;
 import com.kongo.history.api.kongohistoryapi.model.form.AddComicForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindComicForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateComicForm;
+import com.kongo.history.api.kongohistoryapi.model.response.ComicDescribeResponse;
+import com.kongo.history.api.kongohistoryapi.model.response.PopularAuthorResponse;
 import com.kongo.history.api.kongohistoryapi.repository.ComicRepository;
 import com.kongo.history.api.kongohistoryapi.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ComicService {
+    @Autowired
+    private AuthorService authorService;
     @Autowired
     private ComicRepository comicRepository;
 
@@ -233,10 +235,108 @@ public class ComicService {
             if (!comic.getViewers().contains(userId))
                 comic.getViewers().add(userId);
             Map<String, Object> update = new HashMap<>();
-            update.put(Comic.LIKERS, comic.getLikers());
+            update.put(Comic.VIEWERS, comic.getViewers());
             this.comicRepository.save(comicId, update);
             return this.findComic(comicId);
         } catch (ValueDataException e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+
+    public String mostPopularAuthor(final List<String> array)
+    {
+        // Insert all unique strings and update count if a string is not unique.
+        Map<String,Integer> hshmap = new HashMap<String, Integer>();
+        for (String str : array)
+        {
+            if (hshmap.containsKey(str)) // if already exists then update count.
+                hshmap.put(str, hshmap.get(str) + 1);
+            else
+                hshmap.put(str, 1); // else insert it in the map.
+        }
+        // Traverse the map for the maximum value.
+        String maxStr = "";
+        int maxVal = 0;
+        for (Map.Entry<String,Integer> entry : hshmap.entrySet())
+        {
+            String key = entry.getKey();
+            Integer count = entry.getValue();
+            if (count > maxVal)
+            {
+                maxVal = count;
+                maxStr = key;
+            }
+            // Condition for the tie.
+            else if (count == maxVal){
+                if (key.length() < maxStr.length())
+                    maxStr = key;
+            }
+        }
+        System.out.println("Most frequent author: "+ maxStr);
+        System.out.println("Author count: "+ maxVal);
+        return maxStr;
+    }
+
+    public HttpDataResponse<?> mostPopularAuthor(final Integer limit){
+        final var httpDataResponse = new HttpDataResponse<PopularAuthorResponse>();
+        try{
+            final var comics = this.comicRepository.searchByCriteria(limit, new FindComicForm())
+                    .orElseThrow(AppUtilities.supplyException("Failed to retrieve comics.",
+                            AppConst._KEY_CODE_INTERNAL_ERROR));
+
+            final List<Pair<Integer,Comic>> populars = new ArrayList<>();
+            comics.forEach(c -> {
+                if (c.getViewers() != null && !c.getViewers().isEmpty())
+                    populars.add(new Pair<>(c.getViewers().size(),c));
+            });
+
+            populars.sort(Comparator.comparingInt(Pair::getFirst));
+            final var authors = populars.stream().map(a -> a.getSecond().getAuthorId()).toList();
+            final var author = this.mostPopularAuthor(authors);
+            final var authorPopular = this.comicRepository.searchAuthorPopular(author);
+            final var popularAuthorResponse = new PopularAuthorResponse();
+            authorPopular.ifPresent(popularAuthorResponse::setComics);
+            popularAuthorResponse.setAuthor(this.authorService.findAuthor(author).getResponse());
+            httpDataResponse.setResponse(popularAuthorResponse);
+        }
+        catch (ValueDataException e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse);
+        }
+        return httpDataResponse;
+    }
+
+    public HttpDataResponse<?> comicDescribe(final Integer limit){
+        final var httpDataResponse = new HttpDataResponse<ComicDescribeResponse>();
+        try{
+            final var comics = this.comicRepository.searchByCriteria(limit, new FindComicForm())
+                    .orElseThrow(AppUtilities.supplyException("Failed to retrieve comics.",
+                            AppConst._KEY_CODE_INTERNAL_ERROR));
+            double views = 0,likes = 0,comments = 0;
+            for (final var comic : comics){
+                views += comic.getViewers().size();
+                likes += comic.getLikers().size();
+                comments += comic.getComments().size();
+            }
+            final var comicDescribeResponse = new ComicDescribeResponse();
+            comicDescribeResponse.setViews(views);
+            comicDescribeResponse.setLikes(likes);
+            comicDescribeResponse.setComments(comments);
+            comicDescribeResponse.setChartData(new ArrayList<>());
+            comicDescribeResponse.getChartData().add(new Pair<>("Views", views));
+            comicDescribeResponse.getChartData().add(new Pair<>("Likes", likes));
+            comicDescribeResponse.getChartData().add(new Pair<>("comments", comments));
+            httpDataResponse.setResponse(comicDescribeResponse);
+        }
+        catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.kongo.history.api.kongohistoryapi.service;
 
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateAuthorForm;
+import com.kongo.history.api.kongohistoryapi.model.response.PopularAuthorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -201,5 +202,4 @@ public class AuthorService {
         }
         return httpDataResponse;
     }
-
 }

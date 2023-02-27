@@ -12,9 +12,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.storage.Storage;
 import com.kongo.history.api.kongohistoryapi.model.entity.Comic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class ComicRepository extends AbstractFirestoreRepository<Comic> {
@@ -38,6 +36,11 @@ public class ComicRepository extends AbstractFirestoreRepository<Comic> {
 
     public Optional<List<Comic>> searchByCriteria(final Integer limit) throws Exception {
         final var querySnapshot = (limit == null) ? this.getCollectionReference().get().get() : this.getCollectionReference().limit(limit).get().get();
+        return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
+    }
+
+    public Optional<List<Comic>> searchAuthorPopular(final String authorId) throws Exception{
+        final var querySnapshot = this.getCollectionReference().whereEqualTo(Comic.AUTHOR_ID,authorId).whereEqualTo(Comic.STATUS,AppConst._KEY_STATUS_ON).get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
     }
 
