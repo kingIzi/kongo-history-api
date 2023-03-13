@@ -6,12 +6,14 @@ import lombok.Data;
 
 @Data
 public class RegisterUserForm {
-    @NotBlank
+    @NotBlank(message = "Email cannot be empty")
     private String email;
-    @NotBlank
+    @NotBlank(message = "Password cannot be empty")
     private String password;
-    @NotBlank
+    @NotBlank(message = "Please provide a name")
     private String fullName;
     private String phoneNumber;
+    @NotBlank(message = "Please provide a user role")
+    private String role;
     private final boolean returnSecureToken = true;
 }

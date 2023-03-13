@@ -3,7 +3,6 @@ package com.kongo.history.api.kongohistoryapi.controller;
 import com.kongo.history.api.kongohistoryapi.model.entity.User;
 import com.kongo.history.api.kongohistoryapi.model.response.LoginResponse;
 import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
-import com.kongo.history.api.kongohistoryapi.model.form.RegisterAdminForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
 import com.kongo.history.api.kongohistoryapi.service.SessionService;
 import com.kongo.history.api.kongohistoryapi.service.UserService;
@@ -37,12 +36,13 @@ public class UserResource {
     private SessionService sessionService;
 
     @GetMapping("details")
-    public ResponseEntity<User> getUserInfo(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(user);
+    public HttpDataResponse<?> getUserInfo(
+            @AuthenticationPrincipal com.kongo.history.api.kongohistoryapi.auth.models.User user) {
+        return new HttpDataResponse<>(user);
     }
 
     @GetMapping("/list")
-    public HttpDataResponse<List<User>> getUsersList(@RequestParam(required = false) final Integer limit) {
+    public HttpDataResponse<?> getUsersList(@RequestParam(required = false) final Integer limit) {
         return this.userService.getUsersList(limit);
     }
 
@@ -67,11 +67,6 @@ public class UserResource {
     public HttpDataResponse<User> updateFavorites(@RequestParam(required = true) final String userId,
             @RequestParam(required = true) final String comicId) {
         return this.userService.favorites(userId, comicId);
-    }
-
-    @PostMapping("/admin/register")
-    public HttpDataResponse<LoginResponse> registerAdmin(@Valid @RequestBody RegisterAdminForm registerAdminForm) {
-        return this.sessionService.register(registerAdminForm);
     }
 
 }

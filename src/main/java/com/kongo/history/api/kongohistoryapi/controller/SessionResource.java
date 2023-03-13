@@ -13,7 +13,11 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.validation.BindingResult;
 
 @RestController
 @RequestMapping("/session")
@@ -23,12 +27,14 @@ public class SessionResource {
     private SessionService sessionService;
 
     @PostMapping("/login")
-    public HttpDataResponse<LoginResponse> loginUser(@Valid @RequestBody LoginForm loginForm) {
-        return this.sessionService.login(loginForm);
+    public HttpDataResponse<LoginResponse> loginUser(@Valid @RequestBody LoginForm loginForm,
+            BindingResult bindingResult) {
+        return this.sessionService.login(loginForm, bindingResult);
     }
 
     @PostMapping("/register")
-    public HttpDataResponse<LoginResponse> registerUser(@Valid @RequestBody RegisterUserForm registerForm) {
-        return this.sessionService.register(registerForm);
+    public HttpDataResponse<LoginResponse> registerUser(@Valid @RequestBody RegisterUserForm registerForm,
+            BindingResult bindingResult) {
+        return this.sessionService.register(registerForm, bindingResult);
     }
 }

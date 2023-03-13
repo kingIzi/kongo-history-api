@@ -25,6 +25,7 @@ public class User extends BaseEntity {
     public static final String DATE_CREATED = "dateCreated";
     public static final String DATE_UPDATED = "dateUpdated";
     public static final String STATUS = "status";
+    public static final String ROLE = "role";
 
     @DocumentId
     private String id;
@@ -35,8 +36,8 @@ public class User extends BaseEntity {
     private String photoFileName;
     private String photoUrl;
     private List<String> favorites;
-    private String dateCreated;
-    private String dateUpdated;
+    private Date dateCreated;
+    private Date dateUpdated;
     private String role;
     @Pattern(regexp = "ON|OFF")
     private String status = "ON";
@@ -50,8 +51,8 @@ public class User extends BaseEntity {
         this.favorites = new ArrayList<>();
         this.email = email;
         this.role = role;
-        this.dateCreated = AppUtilities.convertDateToString(dateCreaded);
-        this.dateUpdated = AppUtilities.convertDateToString(dateUpdated);
+        this.dateCreated = dateCreaded;
+        this.dateUpdated = dateUpdated;
     }
 
     public User() {

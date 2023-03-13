@@ -26,46 +26,49 @@ public class UserRepository extends AbstractFirestoreRepository<User> {
         super(firestore, UserRepository.NAME, storage);
     }
 
-    private List<Pair<String,Object>> getFindUserForm(final FindUserForm findUserForm){
-        List<Pair<String,Object>> values = new ArrayList<>();
+    private List<Pair<String, Object>> getFindUserForm(final FindUserForm findUserForm) {
+        List<Pair<String, Object>> values = new ArrayList<>();
         values.add(new Pair<>(User.STATUS, findUserForm.getStatus()));
         if (findUserForm.getEmail() != null && !findUserForm.getEmail().isEmpty())
-            values.add(new Pair<>(User.EMAIL,findUserForm.getEmail()));
+            values.add(new Pair<>(User.EMAIL, findUserForm.getEmail()));
         if (findUserForm.getLocalId() != null && !findUserForm.getLocalId().isEmpty())
-            values.add(new Pair<>(User.LOCAL_ID,findUserForm.getLocalId()));
+            values.add(new Pair<>(User.LOCAL_ID, findUserForm.getLocalId()));
         return values;
     }
 
-    public Optional<List<User>> searchByCriteria(final int limit) throws ValueDataException, Exception {
-        final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
-        final var documents = this.makeListFromQuerySnapshots(querySnapshot);
-        return Optional.ofNullable(documents);
+    public Optional<List<User>> searchByCriteria(final Integer limit) throws ValueDataException, Exception {
+        if (limit == null) {
+            final var querySnapshot = this.getCollectionReference().get().get();
+            final var documents = this.makeListFromQuerySnapshots(querySnapshot);
+            return Optional.ofNullable(documents);
+        } else {
+            final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
+            final var documents = this.makeListFromQuerySnapshots(querySnapshot);
+            return Optional.ofNullable(documents);
+        }
     }
 
-    public Optional<List<User>> searchByCriteria(final int limit, final FindUserForm findUserForm) throws Exception{
+    public Optional<List<User>> searchByCriteria(final FindUserForm findUserForm) throws Exception {
         final var values = this.getFindUserForm(findUserForm);
         if (values.size() == 1) {
             final var query = this.getCollectionReference()
-                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit);
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
-        }
-        else if (values.size() == 2) {
+        } else if (values.size() == 2) {
             final var query = this.getCollectionReference()
                     .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
                     .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
-        }
-        else if (values.size() == 3) {
+        } else if (values.size() == 3) {
             final var query = this.getCollectionReference()
                     .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
                     .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond())
                     .whereEqualTo(values.get(2).getFirst(), values.get(2).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
-        }
-        else if (values.size() == 4) {
+        } else if (values.size() == 4) {
             final var query = this.getCollectionReference()
                     .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
                     .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond())
@@ -73,8 +76,40 @@ public class UserRepository extends AbstractFirestoreRepository<User> {
                     .whereEqualTo(values.get(3).getFirst(), values.get(3).getSecond());
             final var querySnapshot = query.get().get();
             return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
-        }
-        else return Optional.empty();
+        } else
+            return Optional.empty();
+    }
+
+    public Optional<List<User>> searchByCriteria(final int limit, final FindUserForm findUserForm) throws Exception {
+        final var values = this.getFindUserForm(findUserForm);
+        if (values.size() == 1) {
+            final var query = this.getCollectionReference()
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit);
+            final var querySnapshot = query.get().get();
+            return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
+        } else if (values.size() == 2) {
+            final var query = this.getCollectionReference()
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond()).limit(limit);
+            final var querySnapshot = query.get().get();
+            return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
+        } else if (values.size() == 3) {
+            final var query = this.getCollectionReference()
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(2).getFirst(), values.get(2).getSecond()).limit(limit);
+            final var querySnapshot = query.get().get();
+            return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
+        } else if (values.size() == 4) {
+            final var query = this.getCollectionReference()
+                    .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(2).getFirst(), values.get(2).getSecond()).limit(limit)
+                    .whereEqualTo(values.get(3).getFirst(), values.get(3).getSecond()).limit(limit);
+            final var querySnapshot = query.get().get();
+            return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
+        } else
+            return Optional.empty();
     }
 
 }

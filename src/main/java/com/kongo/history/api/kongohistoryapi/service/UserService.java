@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
-import com.kongo.history.api.kongohistoryapi.model.form.RegisterAdminForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,19 +32,8 @@ public class UserService {
 
     public void addNewUser(final RegisterUserForm registerForm, final LoginResponse loginResponse) {
         final var user = new User(registerForm.getFullName(), registerForm.getPhoneNumber(),
-                loginResponse.getEmail(), loginResponse.getLocalId(), "user", new Date(), new Date());
-        try {
-            final var saved = this.userRepository.save(user)
-                    .orElseThrow(
-                            AppUtilities.supplyException("Failed to upload user", AppConst._KEY_CODE_INTERNAL_ERROR));
-        } catch (ValueDataException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addNewAdmin(final RegisterAdminForm registerForm, final LoginResponse loginResponse) {
-        final var user = new User(registerForm.getFullName(), registerForm.getPhoneNumber(),
-                loginResponse.getEmail(), loginResponse.getLocalId(), "admin", new Date(), new Date());
+                loginResponse.getEmail().trim(), loginResponse.getLocalId().trim(), registerForm.getRole().trim(),
+                new Date(), new Date());
         try {
             final var saved = this.userRepository.save(user)
                     .orElseThrow(
@@ -59,11 +47,9 @@ public class UserService {
         final var httpDataResponse = new HttpDataResponse<List<User>>();
         try {
             final var users = this.userRepository.searchByCriteria(limit).orElseThrow(
-                    AppUtilities.supplyException("Failed to get users", AppConst._KEY_CODE_INTERNAL_ERROR));
+                    AppUtilities.supplyException("Failed to get users",
+                            AppConst._KEY_CODE_INTERNAL_ERROR));
             httpDataResponse.setResponse(users);
-        } catch (ValueDataException e) {
-            e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
@@ -74,10 +60,17 @@ public class UserService {
     public HttpDataResponse<List<User>> getUsersList(final Integer limit, final FindUserForm findUserForm) {
         final var httpDataResponse = new HttpDataResponse<List<User>>();
         try {
-            final var users = this.userRepository.searchByCriteria(limit, findUserForm)
-                    .orElseThrow(AppUtilities.supplyException("Failed to retrieve users. Please contact support.",
-                            AppConst._KEY_CODE_INTERNAL_ERROR));
-            httpDataResponse.setResponse(users);
+            if (limit != null) {
+                final var users = this.userRepository.searchByCriteria(limit, findUserForm)
+                        .orElseThrow(AppUtilities.supplyException("Failed to retrieve users. Please contact support.",
+                                AppConst._KEY_CODE_INTERNAL_ERROR));
+                return new HttpDataResponse<List<User>>(users);
+            } else {
+                final var users = this.userRepository.searchByCriteria(findUserForm)
+                        .orElseThrow(AppUtilities.supplyException("Failed to retrieve users. Please contact support.",
+                                AppConst._KEY_CODE_INTERNAL_ERROR));
+                return new HttpDataResponse<List<User>>(users);
+            }
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
@@ -116,6 +109,8 @@ public class UserService {
             values.put(User.PHONE_NUMBER, updateUserForm.getPhoneNumber());
         if (updateUserForm.getFavorites() != null)
             values.put(User.FAVORITES, updateUserForm.getFavorites());
+        if (updateUserForm.getRole() != null)
+            values.put(User.ROLE, updateUserForm.getRole());
         if (!values.isEmpty())
             values.put(User.DATE_UPDATED, new Date());
         return values;

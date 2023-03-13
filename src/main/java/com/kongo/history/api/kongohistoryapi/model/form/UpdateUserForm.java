@@ -10,4 +10,5 @@ public class UpdateUserForm {
     private List<String> favorites;
     private String photoFileName;
     private String photoUrl;
+    private String role;
 }
