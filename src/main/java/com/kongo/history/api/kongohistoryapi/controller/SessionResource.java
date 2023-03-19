@@ -27,10 +27,16 @@ public class SessionResource {
     private SessionService sessionService;
 
     @PostMapping("/login")
-    public HttpDataResponse<LoginResponse> loginUser(@Valid @RequestBody LoginForm loginForm,
+    public HttpDataResponse<?> loginUser(@Valid @RequestBody LoginForm loginForm,
             BindingResult bindingResult) {
         return this.sessionService.login(loginForm, bindingResult);
     }
+
+    // @PostMapping("/login")
+    // public ResponseEntity<?> loginUser(@Valid @RequestBody LoginForm loginForm,
+    // BindingResult bindingResult) {
+    // return this.sessionService.login(loginForm, bindingResult);
+    // }
 
     @PostMapping("/register")
     public HttpDataResponse<LoginResponse> registerUser(@Valid @RequestBody RegisterUserForm registerForm,
