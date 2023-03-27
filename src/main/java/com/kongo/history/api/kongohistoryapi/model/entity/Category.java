@@ -28,8 +28,8 @@ public class Category extends BaseEntity {
     private String description;
     @Pattern(regexp = "ON|OFF")
     private String status = "ON";
-    private String dateCreated;
-    private String dateUpdated;
+    private Date dateCreated;
+    private Date dateUpdated;
     private String thumbnailUrl;
     private String thumbnailFileName;
     private String color;
@@ -41,9 +41,10 @@ public class Category extends BaseEntity {
         this.color = color;
         this.thumbnailUrl = thumbnailUrl;
         this.thumbnailFileName = thumbnailFileName;
-        this.dateCreated = AppUtilities.convertDateToString(new Date());
-        this.dateUpdated = AppUtilities.convertDateToString(new Date());
+        this.dateCreated = new Date();
+        this.dateUpdated = new Date();
     }
 
-    public Category() {}
+    public Category() {
+    }
 }

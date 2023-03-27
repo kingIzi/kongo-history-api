@@ -69,14 +69,13 @@ public class CategoryService {
     public HttpDataResponse<Category> findCategory(final String categoryId) {
         final var httpDataResponse = new HttpDataResponse<Category>();
         try {
-            final var category = this.categoryRepository.get(categoryId).orElseThrow(AppUtilities.supplyException("Category not found",AppConst._KEY_CODE_PARAMS_ERROR));
+            final var category = this.categoryRepository.get(categoryId)
+                    .orElseThrow(AppUtilities.supplyException("Category not found", AppConst._KEY_CODE_PARAMS_ERROR));
             httpDataResponse.setResponse(category);
-        }
-        catch (ValueDataException e){
+        } catch (ValueDataException e) {
             e.printStackTrace();
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse,e);
-        }
-        catch (Exception e) {
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
+        } catch (Exception e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
@@ -95,12 +94,13 @@ public class CategoryService {
                 values.put(Category.COLOR, updateCategoryForm.getColor());
             if (AppUtilities.modifiableValue(Category.STATUS, updateCategoryForm.getStatus()))
                 values.put(Category.STATUS, updateCategoryForm.getStatus());
-            if (AppUtilities.modifiableValue(category.getThumbnailFileName(),updateCategoryForm.getThumbnailFileName()))
+            if (AppUtilities.modifiableValue(category.getThumbnailFileName(),
+                    updateCategoryForm.getThumbnailFileName()))
                 values.put(Category.THUMBNAIL_FILENAME, updateCategoryForm.getThumbnailFileName());
             if (AppUtilities.modifiableValue(category.getThumbnailUrl(), updateCategoryForm.getThumbnailUrl()))
                 values.put(Category.THUMBNAIL_URL, updateCategoryForm.getThumbnailUrl());
             if (!values.isEmpty())
-                values.put(Category.DATE_UPDATED, AppUtilities.convertDateToString(new Date()));
+                values.put(Category.DATE_UPDATED, new Date());
 
             return values;
         } catch (DateTimeException e) {
@@ -118,7 +118,8 @@ public class CategoryService {
                 throw new ValueDataException("Category not found", AppConst._KEY_CODE_PARAMS_ERROR);
 
             if (thumbnail != null && !thumbnail.isEmpty()) {
-                final var thumbnailUrl = this.categoryRepository.uploadFile(thumbnail).orElseThrow(AppUtilities.supplyException("Failed to upload thumbnail data",AppConst._KEY_CODE_INTERNAL_ERROR));
+                final var thumbnailUrl = this.categoryRepository.uploadFile(thumbnail).orElseThrow(AppUtilities
+                        .supplyException("Failed to upload thumbnail data", AppConst._KEY_CODE_INTERNAL_ERROR));
                 this.categoryRepository.removeFile(category.getThumbnailFileName());
                 updateCategoryForm.setThumbnailUrl((String) thumbnailUrl.getSecond());
                 updateCategoryForm.setThumbnailFileName((String) thumbnailUrl.getFirst());
@@ -126,7 +127,8 @@ public class CategoryService {
             final var newCategory = this.updatedCategoryValues(category, updateCategoryForm);
             if (this.categoryRepository.save(categoryId, newCategory))
                 return this.findCategory(categoryId);
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse,"No items found to update",AppConst._KEY_MSG_SUCCESS);
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, "No items found to update",
+                    AppConst._KEY_MSG_SUCCESS);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
@@ -159,21 +161,18 @@ public class CategoryService {
         return httpDataResponse;
     }
 
-    public HttpDataResponse<List<Category>> getCategoryList(final Integer limit){
+    public HttpDataResponse<List<Category>> getCategoryList(final Integer limit) {
         final var httpDataResponse = new HttpDataResponse<List<Category>>();
-        try{
+        try {
             final var data = this.categoryRepository.searchCriteria(limit);
             data.ifPresentOrElse(httpDataResponse::setResponse, data::orElseThrow);
-        }
-        catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
-        }
-        catch (ValueDataException e) {
+        } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }

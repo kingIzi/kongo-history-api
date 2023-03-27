@@ -36,12 +36,7 @@ public class AuthorService {
     @Autowired
     private AuthorRepository authorRepository;
 
-    private Author makeAuthor(final AddAuthorForm addAuthorForm) throws ValueDataException {
-        final var localDate = LocalDate.parse(addAuthorForm.getDateOfBirth());
-        if (localDate == null)
-            throw new ValueDataException("Could not parse Date String. Please Ensure format is yyyy-MM-dd",
-                    AppConst._KEY_CODE_PARAMS_ERROR);
-
+    private Author makeAuthor(final AddAuthorForm addAuthorForm) throws Exception {
         final var dateOfBirth = AppUtilities.convertStringFormatToDate(addAuthorForm.getDateOfBirth());
         return new Author(addAuthorForm.getFirstName().trim(), addAuthorForm.getLastName().trim(), dateOfBirth,
                 addAuthorForm.getAddress().trim(), addAuthorForm.getPhoneNumber().trim(),
@@ -145,7 +140,7 @@ public class AuthorService {
                 values.put(Author.DATE_OF_BIRTH, AppUtilities.convertDateToString(
                         AppUtilities.convertStringFormatToDate(updateAuthorForm.getDateOfBirth())));
             if (!values.isEmpty())
-                values.put(Author.DATE_UPDATED, AppUtilities.convertDateToString(new Date()));
+                values.put(Author.DATE_UPDATED, new Date());
 
             return values;
         } catch (DateTimeParseException e) {
@@ -172,7 +167,8 @@ public class AuthorService {
             final var newAuthor = this.updateAuthorValues(author, updateAuthorForm);
             if (this.authorRepository.save(authorId, newAuthor))
                 return this.findAuthor(authorId);
-            UtilityFormatter.formatMessagesParamsError(httpDataResponse,"No items found to update",AppConst._KEY_MSG_SUCCESS);
+            UtilityFormatter.formatMessagesParamsError(httpDataResponse, "No items found to update",
+                    AppConst._KEY_MSG_SUCCESS);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);

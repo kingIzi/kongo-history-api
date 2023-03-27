@@ -10,7 +10,6 @@ import com.kongo.history.api.kongohistoryapi.utils.DocumentId;
 
 import lombok.Data;
 
-
 @Data
 public class Author extends BaseEntity {
     public static final String ID = "id";
@@ -25,43 +24,45 @@ public class Author extends BaseEntity {
     public static final String DATE_CREATED = "dateCreated";
     public static final String DATE_UPDATED = "dateUpdated";
 
-
     @DocumentId
     private String id;
     private String firstName;
     private String lastName;
-    private String dateOfBirth;
+    private Date dateOfBirth;
     private String address;
     private String phoneNumber;
-    //@Pattern(regexp = "ON|OFF")
+    // @Pattern(regexp = "ON|OFF")
     @Pattern(regexp = "ON|OFF")
     private String status = "ON";
     private String photoUrl;
     private String photoFileName;
-    private String dateCreated;
-    private String dataUpdated;
+    private Date dateCreated;
+    private Date dataUpdated;
 
-    public Author(final String firstName,final String lastName,final Date dateOfBirth,final String address,final String phoneNumber,final String photoUrl,final String photoFileName,final Date dateCreated,final Date dateUpdated){
+    public Author(final String firstName, final String lastName, final Date dateOfBirth, final String address,
+            final String phoneNumber, final String photoUrl, final String photoFileName, final Date dateCreated,
+            final Date dateUpdated) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.dateOfBirth = AppUtilities.convertDateToString(dateOfBirth);
+        this.dateOfBirth = dateOfBirth;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.photoUrl = photoUrl;
         this.photoFileName = photoFileName;
-        this.dateCreated = AppUtilities.convertDateToString(dateCreated);
-        this.dataUpdated = AppUtilities.convertDateToString(dateUpdated);
+        this.dateCreated = dateCreated;
+        this.dataUpdated = dateUpdated;
     }
 
-    public Author(){}
+    public Author() {
+    }
 
     @Override
-    public void setId(final String id){
+    public void setId(final String id) {
         this.id = id;
     }
 
     @Override
-    public final String getId(){
+    public final String getId() {
         return this.id;
     }
 }

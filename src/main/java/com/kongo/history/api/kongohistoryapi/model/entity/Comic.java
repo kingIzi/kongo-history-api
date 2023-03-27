@@ -40,8 +40,8 @@ public class Comic extends BaseEntity {
     private List<String> viewers;
     private List<String> likers;
     private List<Comment> comments;
-    private String dateCreated;
-    private String dataUpdated;
+    private Date dateCreated;
+    private Date dataUpdated;
     private String thumbnailUrl;
     private String thumbnailFileName;
     private String dataUrl;
@@ -65,8 +65,8 @@ public class Comic extends BaseEntity {
         this.thumbnailUrl = thumbnailUrl;
         this.dataFileName = dataFileName;
         this.dataUrl = dataUrl;
-        this.dateCreated = AppUtilities.convertDateToString(new Date());
-        this.dataUpdated = AppUtilities.convertDateToString(new Date());
+        this.dateCreated = new Date();
+        this.dataUpdated = new Date();
         this.status = "ON";
         this.viewers = new ArrayList<>();
         this.likers = new ArrayList<>();

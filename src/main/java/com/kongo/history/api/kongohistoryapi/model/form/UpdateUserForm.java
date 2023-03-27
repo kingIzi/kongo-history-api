@@ -11,4 +11,5 @@ public class UpdateUserForm {
     private String photoFileName;
     private String photoUrl;
     private String role;
+    private String fullName;
 }

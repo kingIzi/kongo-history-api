@@ -16,14 +16,14 @@ public class Comment {
     private List<String> likes;
     private List<Comment> replies;
 
-    private String dateCreated;
-    private String dateUpdated;
+    private Date dateCreated;
+    private Date dateUpdated;
 
     public Comment(final String email, final String message) {
         this.email = email;
         this.message = message;
-        this.dateCreated = AppUtilities.convertDateToString(new Date());
-        this.dateUpdated = AppUtilities.convertDateToString(new Date());
+        this.dateCreated = new Date();
+        this.dateUpdated = new Date();
     }
 
     public Comment() {

@@ -10,4 +10,5 @@ public class FindUserForm {
     private String email;
     @Pattern(regexp = "ON|OFF")
     private String status = "ON";
+    private String role;
 }

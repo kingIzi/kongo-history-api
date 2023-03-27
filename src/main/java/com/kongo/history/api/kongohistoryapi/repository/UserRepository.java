@@ -16,6 +16,7 @@ import com.kongo.history.api.kongohistoryapi.utils.AppConst;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class UserRepository extends AbstractFirestoreRepository<User> {
@@ -27,17 +28,19 @@ public class UserRepository extends AbstractFirestoreRepository<User> {
     }
 
     private List<Pair<String, Object>> getFindUserForm(final FindUserForm findUserForm) {
-        List<Pair<String, Object>> values = new ArrayList<>();
+        final var values = new ArrayList<Pair<String, Object>>();
         values.add(new Pair<>(User.STATUS, findUserForm.getStatus()));
         if (findUserForm.getEmail() != null && !findUserForm.getEmail().isEmpty())
             values.add(new Pair<>(User.EMAIL, findUserForm.getEmail()));
         if (findUserForm.getLocalId() != null && !findUserForm.getLocalId().isEmpty())
             values.add(new Pair<>(User.LOCAL_ID, findUserForm.getLocalId()));
+        if (Objects.nonNull(findUserForm.getRole()) && !findUserForm.getRole().isEmpty())
+            values.add(new Pair<>(User.ROLE, findUserForm.getRole()));
         return values;
     }
 
     public Optional<List<User>> searchByCriteria(final Integer limit) throws ValueDataException, Exception {
-        if (limit == null) {
+        if (Objects.isNull(limit)) {
             final var querySnapshot = this.getCollectionReference().get().get();
             final var documents = this.makeListFromQuerySnapshots(querySnapshot);
             return Optional.ofNullable(documents);

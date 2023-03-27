@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 
 import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
@@ -20,8 +21,6 @@ import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
 import com.kongo.history.api.kongohistoryapi.utils.UtilityFormatter;
 import com.kongo.history.api.kongohistoryapi.utils.ValueDataException;
 import com.kongo.history.api.kongohistoryapi.utils.AppConst;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -31,7 +30,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public void addNewUser(final RegisterUserForm registerForm, final LoginResponse loginResponse) {
-        final var user = new User(registerForm.getFullName(), registerForm.getPhoneNumber(),
+        final var user = new User(registerForm.getFullName().trim(), registerForm.getPhoneNumber().trim(),
                 loginResponse.getEmail().trim(), loginResponse.getLocalId().trim(), registerForm.getRole().trim(),
                 new Date(), new Date());
         try {
@@ -111,6 +110,8 @@ public class UserService {
             values.put(User.FAVORITES, updateUserForm.getFavorites());
         if (updateUserForm.getRole() != null)
             values.put(User.ROLE, updateUserForm.getRole());
+        if (Objects.nonNull(updateUserForm.getFullName()) && !updateUserForm.getFullName().isEmpty())
+            values.put(User.FULL_NAME, updateUserForm.getFullName());
         if (!values.isEmpty())
             values.put(User.DATE_UPDATED, new Date());
         return values;

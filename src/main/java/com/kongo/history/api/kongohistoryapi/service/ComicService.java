@@ -1,7 +1,6 @@
 package com.kongo.history.api.kongohistoryapi.service;
 
 import com.google.firebase.database.utilities.Pair;
-import com.kongo.history.api.kongohistoryapi.model.entity.Author;
 import com.kongo.history.api.kongohistoryapi.model.entity.Comic;
 import com.kongo.history.api.kongohistoryapi.model.form.AddComicForm;
 import com.kongo.history.api.kongohistoryapi.model.form.FindComicForm;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ComicService {
@@ -56,6 +54,8 @@ public class ComicService {
             values.put(Comic.DATA_FILENAME, updateComicForm.getDataFileName());
         if (!updateComicForm.getDataUrl().isEmpty())
             values.put(Comic.DATA_URL, updateComicForm.getDataUrl());
+        if (!values.isEmpty())
+            values.put(Comic.DATE_UPDATED, new Date());
 
         return values;
     }
@@ -248,12 +248,10 @@ public class ComicService {
         return httpDataResponse;
     }
 
-    public String mostPopularAuthor(final List<String> array)
-    {
+    public String mostPopularAuthor(final List<String> array) {
         // Insert all unique strings and update count if a string is not unique.
-        Map<String,Integer> hshmap = new HashMap<String, Integer>();
-        for (String str : array)
-        {
+        Map<String, Integer> hshmap = new HashMap<String, Integer>();
+        for (String str : array) {
             if (hshmap.containsKey(str)) // if already exists then update count.
                 hshmap.put(str, hshmap.get(str) + 1);
             else
@@ -262,37 +260,35 @@ public class ComicService {
         // Traverse the map for the maximum value.
         String maxStr = "";
         int maxVal = 0;
-        for (Map.Entry<String,Integer> entry : hshmap.entrySet())
-        {
+        for (Map.Entry<String, Integer> entry : hshmap.entrySet()) {
             String key = entry.getKey();
             Integer count = entry.getValue();
-            if (count > maxVal)
-            {
+            if (count > maxVal) {
                 maxVal = count;
                 maxStr = key;
             }
             // Condition for the tie.
-            else if (count == maxVal){
+            else if (count == maxVal) {
                 if (key.length() < maxStr.length())
                     maxStr = key;
             }
         }
-        System.out.println("Most frequent author: "+ maxStr);
-        System.out.println("Author count: "+ maxVal);
+        System.out.println("Most frequent author: " + maxStr);
+        System.out.println("Author count: " + maxVal);
         return maxStr;
     }
 
-    public HttpDataResponse<?> mostPopularAuthor(final Integer limit){
+    public HttpDataResponse<?> mostPopularAuthor(final Integer limit) {
         final var httpDataResponse = new HttpDataResponse<PopularAuthorResponse>();
-        try{
+        try {
             final var comics = this.comicRepository.searchByCriteria(limit, new FindComicForm())
                     .orElseThrow(AppUtilities.supplyException("Failed to retrieve comics.",
                             AppConst._KEY_CODE_INTERNAL_ERROR));
 
-            final List<Pair<Integer,Comic>> populars = new ArrayList<>();
+            final List<Pair<Integer, Comic>> populars = new ArrayList<>();
             comics.forEach(c -> {
                 if (c.getViewers() != null && !c.getViewers().isEmpty())
-                    populars.add(new Pair<>(c.getViewers().size(),c));
+                    populars.add(new Pair<>(c.getViewers().size(), c));
             });
 
             populars.sort(Comparator.comparingInt(Pair::getFirst));
@@ -303,8 +299,7 @@ public class ComicService {
             authorPopular.ifPresent(popularAuthorResponse::setComics);
             popularAuthorResponse.setAuthor(this.authorService.findAuthor(author).getResponse());
             httpDataResponse.setResponse(popularAuthorResponse);
-        }
-        catch (ValueDataException e) {
+        } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {
@@ -314,14 +309,14 @@ public class ComicService {
         return httpDataResponse;
     }
 
-    public HttpDataResponse<?> comicDescribe(final Integer limit){
+    public HttpDataResponse<?> comicDescribe(final Integer limit) {
         final var httpDataResponse = new HttpDataResponse<ComicDescribeResponse>();
-        try{
+        try {
             final var comics = this.comicRepository.searchByCriteria(limit, new FindComicForm())
                     .orElseThrow(AppUtilities.supplyException("Failed to retrieve comics.",
                             AppConst._KEY_CODE_INTERNAL_ERROR));
-            double views = 0,likes = 0,comments = 0;
-            for (final var comic : comics){
+            double views = 0, likes = 0, comments = 0;
+            for (final var comic : comics) {
                 views += comic.getViewers().size();
                 likes += comic.getLikers().size();
                 comments += comic.getComments().size();
@@ -335,8 +330,7 @@ public class ComicService {
             comicDescribeResponse.getChartData().add(new Pair<>("Likes", likes));
             comicDescribeResponse.getChartData().add(new Pair<>("comments", comments));
             httpDataResponse.setResponse(comicDescribeResponse);
-        }
-        catch (ValueDataException e) {
+        } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
         } catch (Exception e) {
