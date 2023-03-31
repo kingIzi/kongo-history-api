@@ -98,20 +98,18 @@ public class UserService {
 
     private Map<String, Object> updateUserValues(final User user, final UpdateUserForm updateUserForm) {
         final var values = new HashMap<String, Object>();
-        if (AppUtilities.modifiableValue(user.getEmail(), updateUserForm.getEmail()))
+        if (Objects.nonNull(updateUserForm.getEmail()) && !updateUserForm.getEmail().isEmpty())
             values.put(User.EMAIL, updateUserForm.getEmail());
-        if (AppUtilities.modifiableValue(user.getPhotoUrl(), updateUserForm.getPhotoUrl()))
-            values.put(User.PHOTO_URL, updateUserForm.getPhotoUrl());
-        if (AppUtilities.modifiableValue(user.getPhotoFileName(), updateUserForm.getPhotoFileName()))
-            values.put(User.PHOTO_FILENAME, updateUserForm.getPhotoFileName());
-        if (AppUtilities.modifiableValue(user.getPhoneNumber(), updateUserForm.getPhoneNumber()))
-            values.put(User.PHONE_NUMBER, updateUserForm.getPhoneNumber());
-        if (updateUserForm.getFavorites() != null)
-            values.put(User.FAVORITES, updateUserForm.getFavorites());
-        if (updateUserForm.getRole() != null)
-            values.put(User.ROLE, updateUserForm.getRole());
         if (Objects.nonNull(updateUserForm.getFullName()) && !updateUserForm.getFullName().isEmpty())
             values.put(User.FULL_NAME, updateUserForm.getFullName());
+        if (Objects.nonNull(updateUserForm.getPhoneNumber()) && !updateUserForm.getPhoneNumber().isEmpty())
+            values.put(User.PHONE_NUMBER, updateUserForm.getPhoneNumber());
+        if (Objects.nonNull(updateUserForm.getPhotoUrl()) && !updateUserForm.getPhotoUrl().isEmpty())
+            values.put(User.PHOTO_URL, updateUserForm.getPhotoUrl());
+        if (Objects.nonNull(updateUserForm.getPhotoFileName()) && !updateUserForm.getPhotoFileName().isEmpty())
+            values.put(User.PHOTO_FILENAME, updateUserForm.getPhotoFileName());
+        if (Objects.nonNull(updateUserForm.getRole()) && !updateUserForm.getRole().isEmpty())
+            values.put(User.ROLE, updateUserForm.getRole());
         if (!values.isEmpty())
             values.put(User.DATE_UPDATED, new Date());
         return values;
@@ -133,7 +131,7 @@ public class UserService {
             if (this.userRepository.save(userId, updatedUser))
                 return this.findUser(userId);
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, "No items found to update",
-                    AppConst._KEY_MSG_SUCCESS);
+                    AppConst._KEY_CODE_PARAMS_ERROR);
         } catch (ValueDataException e) {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse, e);
@@ -144,20 +142,17 @@ public class UserService {
         return httpDataResponse;
     }
 
-    public HttpDataResponse<User> favorites(final String userId, final String comidId) {
+    public HttpDataResponse<User> favorites(final String userId, final String comicId) {
         final var httpDataResponse = new HttpDataResponse<User>();
         try {
             final var user = this.userRepository.get(userId)
                     .orElseThrow(AppUtilities.supplyException("Failed to find user", AppConst._KEY_CODE_PARAMS_ERROR));
-            if (user.getFavorites() == null) {
-                user.setFavorites(new ArrayList<>());
-                user.getFavorites().add(userId);
-            }
-            if (user.getFavorites().contains(userId))
-                user.getFavorites().remove(userId);
-            if (!user.getFavorites().contains(userId))
-                user.getFavorites().add(userId);
-
+            if (Objects.isNull(user.getFavorites()))
+                user.setFavorites(List.of(comicId));
+            else if (user.getFavorites().contains(comicId))
+                user.getFavorites().remove(comicId);
+            else
+                user.getFavorites().add(comicId);
             Map<String, Object> update = new HashMap<>();
             update.put(User.FAVORITES, user.getFavorites());
             this.userRepository.save(userId, update);
