@@ -19,32 +19,41 @@ public class ComicRepository extends AbstractFirestoreRepository<Comic> {
 
     private static final String NAME = "comic";
 
-    protected ComicRepository(Firestore firestore, Storage storage){
-        super(firestore, ComicRepository.NAME,storage);
+    protected ComicRepository(Firestore firestore, Storage storage) {
+        super(firestore, ComicRepository.NAME, storage);
     }
 
-    private List<Pair<String,Object>> getFindComicValues(final FindComicForm findComicForm){
-        List<Pair<String,Object>> values = new ArrayList<>();
+    private List<Pair<String, Object>> getFindComicValues(final FindComicForm findComicForm) {
+        List<Pair<String, Object>> values = new ArrayList<>();
         values.add(new Pair<>(Comic.STATUS, AppConst._KEY_STATUS_ON));
         if (findComicForm.getName() != null && !findComicForm.getName().isEmpty())
-            values.add(new Pair<>(Comic.NAME,findComicForm.getName()));
+            values.add(new Pair<>(Comic.NAME, findComicForm.getName()));
         if (findComicForm.getAuthorId() != null && !findComicForm.getAuthorId().isEmpty())
-            values.add(new Pair<>(Comic.AUTHOR_ID,findComicForm.getAuthorId()));
+            values.add(new Pair<>(Comic.AUTHOR_ID, findComicForm.getAuthorId()));
 
         return values;
     }
 
     public Optional<List<Comic>> searchByCriteria(final Integer limit) throws Exception {
-        final var querySnapshot = (limit == null) ? this.getCollectionReference().get().get() : this.getCollectionReference().limit(limit).get().get();
+        if (Objects.nonNull(limit)) {
+            final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
+            final var documents = this.makeListFromQuerySnapshots(querySnapshot);
+            return Optional.ofNullable(documents);
+        } else {
+            final var querySnapshot = this.getCollectionReference().get().get();
+            final var documents = this.makeListFromQuerySnapshots(querySnapshot);
+            return Optional.ofNullable(documents);
+        }
+    }
+
+    public Optional<List<Comic>> searchAuthorPopular(final String authorId) throws Exception {
+        final var querySnapshot = this.getCollectionReference().whereEqualTo(Comic.AUTHOR_ID, authorId)
+                .whereEqualTo(Comic.STATUS, AppConst._KEY_STATUS_ON).get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
     }
 
-    public Optional<List<Comic>> searchAuthorPopular(final String authorId) throws Exception{
-        final var querySnapshot = this.getCollectionReference().whereEqualTo(Comic.AUTHOR_ID,authorId).whereEqualTo(Comic.STATUS,AppConst._KEY_STATUS_ON).get().get();
-        return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));
-    }
-
-    public Optional<List<Comic>> searchByCriteria(final Integer limit, final FindComicForm findComicForm) throws Exception{
+    public Optional<List<Comic>> searchByCriteria(final Integer limit, final FindComicForm findComicForm)
+            throws Exception {
         final var values = this.getFindComicValues(findComicForm);
         if (values.size() == 1) {
             final var query = this.getCollectionReference()

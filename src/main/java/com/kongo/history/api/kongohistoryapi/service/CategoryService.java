@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 import org.threeten.bp.DateTimeException;
 
@@ -180,9 +181,10 @@ public class CategoryService {
     }
 
     public HttpDataResponse<List<Category>> getCategoryList(final Integer limit,
-            final FindCategoryForm findCategoryForm) {
+            final FindCategoryForm findCategoryForm, BindingResult bindingResult) {
         final var httpDataResponse = new HttpDataResponse<List<Category>>();
         try {
+            AppUtilities.controlForm(bindingResult);
             final var data = this.categoryRepository.searchCriteria(limit, findCategoryForm);
             data.ifPresentOrElse(httpDataResponse::setResponse, data::orElseThrow);
         } catch (NoSuchElementException e) {

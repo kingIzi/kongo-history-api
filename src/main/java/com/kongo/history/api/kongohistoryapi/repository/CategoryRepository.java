@@ -52,8 +52,8 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
         }
     }
 
-    private List<Pair<String,Object>> getFindCategoryForm(final FindCategoryForm findCategoryForm) {
-        List<Pair<String,Object>> values = new ArrayList<>();
+    private List<Pair<String, Object>> getFindCategoryForm(final FindCategoryForm findCategoryForm) {
+        List<Pair<String, Object>> values = new ArrayList<>();
 
         values.add(new Pair<>(Category.STATUS, findCategoryForm.getStatus()));
         values.add(new Pair<>(Category.NAME, findCategoryForm.getName()));
@@ -66,7 +66,6 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
             throw new ValueDataException("Limit is too small. Must be at least 10.", AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var querySnapshot = this.getCollectionReference().limit(limit).get().get();
-        System.out.println(querySnapshot.getDocuments().size());
         return Optional.of(this.makeListFromQuerySnapshots(querySnapshot));
     }
 
@@ -80,7 +79,7 @@ public class CategoryRepository extends AbstractFirestoreRepository<Category> {
                     AppConst._KEY_CODE_PARAMS_ERROR);
 
         final var query = this.getCollectionReference()
-                .whereEqualTo(values.get(0).getFirst(), values.get(0).getFirst())
+                .whereEqualTo(values.get(0).getFirst(), values.get(0).getSecond())
                 .whereEqualTo(values.get(1).getFirst(), values.get(1).getSecond());
         final var querySnapshot = query.get().get();
         return Optional.ofNullable(this.makeListFromQuerySnapshots(querySnapshot));

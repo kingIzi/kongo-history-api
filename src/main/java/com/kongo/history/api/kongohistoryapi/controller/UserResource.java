@@ -2,6 +2,7 @@ package com.kongo.history.api.kongohistoryapi.controller;
 
 import com.kongo.history.api.kongohistoryapi.model.entity.User;
 import com.kongo.history.api.kongohistoryapi.model.response.LoginResponse;
+import com.kongo.history.api.kongohistoryapi.model.response.MostPopularAuthorResponse;
 import com.kongo.history.api.kongohistoryapi.model.form.FindUserForm;
 import com.kongo.history.api.kongohistoryapi.model.form.UpdateUserForm;
 import com.kongo.history.api.kongohistoryapi.service.SessionService;
@@ -67,6 +68,11 @@ public class UserResource {
     public HttpDataResponse<User> updateFavorites(@RequestParam(required = true) final String userId,
             @RequestParam(required = true) final String comicId) {
         return this.userService.favorites(userId, comicId);
+    }
+
+    @GetMapping("/mostPopular/author")
+    public HttpDataResponse<MostPopularAuthorResponse> mostPopularAuthorResponse() {
+        return this.userService.mostPopularAutor();
     }
 
 }

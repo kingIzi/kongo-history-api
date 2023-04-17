@@ -53,6 +53,7 @@ public class User extends BaseEntity {
         this.role = role;
         this.dateCreated = dateCreaded;
         this.dateUpdated = dateUpdated;
+
     }
 
     public User() {

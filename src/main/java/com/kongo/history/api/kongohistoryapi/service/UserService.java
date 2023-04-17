@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.kongo.history.api.kongohistoryapi.model.entity.User;
 import com.kongo.history.api.kongohistoryapi.model.form.RegisterUserForm;
 import com.kongo.history.api.kongohistoryapi.model.response.LoginResponse;
+import com.kongo.history.api.kongohistoryapi.model.response.MostPopularAuthorResponse;
 import com.kongo.history.api.kongohistoryapi.repository.UserRepository;
 import com.kongo.history.api.kongohistoryapi.utils.AppUtilities;
 import com.kongo.history.api.kongohistoryapi.utils.HttpDataResponse;
@@ -164,6 +165,11 @@ public class UserService {
             e.printStackTrace();
             UtilityFormatter.formatMessagesParamsError(httpDataResponse);
         }
+        return httpDataResponse;
+    }
+
+    public HttpDataResponse<MostPopularAuthorResponse> mostPopularAutor() {
+        final var httpDataResponse = new HttpDataResponse<MostPopularAuthorResponse>();
         return httpDataResponse;
     }
 }

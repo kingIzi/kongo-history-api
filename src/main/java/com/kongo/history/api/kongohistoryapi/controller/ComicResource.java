@@ -61,24 +61,26 @@ public class ComicResource {
     @PostMapping("/list")
     public HttpDataResponse<List<Comic>> getComicList(@RequestParam(required = false) Integer limit,
             @RequestBody FindComicForm findComicForm) {
-        return new HttpDataResponse<>();
+        return this.comicService.getComicList(limit, findComicForm);
     }
 
     @DeleteMapping("/delete")
     public HttpDataResponse<String> removeComic(@RequestParam(required = true) String comicId) {
         return this.comicService.removeComic(comicId);
     }
+
     @GetMapping("/findOne")
     public HttpDataResponse<Comic> findComic(@RequestParam(required = true) String comicId) {
         return this.comicService.findComic(comicId);
     }
+
     @GetMapping("/describe")
-    public HttpDataResponse<?> comicDescribe(@RequestParam(required = false) Integer limit){
+    public HttpDataResponse<?> comicDescribe(@RequestParam(required = false) Integer limit) {
         return this.comicService.comicDescribe(limit == null ? 1000 : limit);
     }
 
     @GetMapping("/mostPopular")
-    public HttpDataResponse<?> mostPopular(@RequestParam(required = false) Integer limit){
+    public HttpDataResponse<?> mostPopular(@RequestParam(required = false) Integer limit) {
         return this.comicService.mostPopularAuthor(limit == null ? 1000 : limit);
     }
 

@@ -1,6 +1,7 @@
 package com.kongo.history.api.kongohistoryapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,10 +54,10 @@ public class CategoryResource {
 
     @PostMapping("/list")
     public HttpDataResponse<List<Category>> getCategoryList(@RequestParam(required = false) Integer limit,
-            @Valid @RequestBody final FindCategoryForm findCategoryForm) {
+            @Valid @RequestBody final FindCategoryForm findCategoryForm, BindingResult bindingResult) {
         if (limit == null)
             limit = 10;
 
-        return this.categoryService.getCategoryList(limit, findCategoryForm);
+        return this.categoryService.getCategoryList(limit, findCategoryForm, bindingResult);
     }
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class FindCategoryForm {
-    @NotBlank
+    @NotBlank(message = "Please provide a category name")
     private String name;
     private String status = "ON";
 }
